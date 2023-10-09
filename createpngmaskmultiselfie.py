@@ -8,6 +8,8 @@ import math as math
 import numpy as np
 import sys
 import pprint
+import PIL
+from PIL import Image
 from mediapipe.python._framework_bindings import image
 from mediapipe.python._framework_bindings import image_frame
 from mediapipe.tasks.python import vision
@@ -16,8 +18,8 @@ from cvzone.ClassificationModule import Classifier
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 model_path="D:\\VTON\\Models\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\VTON\\overlay\\human_image6.jpg'
-input_path = 'D:\\VTON\\overlay\\necklace4.jpg'
+human_path = 'D:\\VTON\\overlay\\human_image7.jpg'
+input_path = "D:\\VTON\\overlay\\necklace3.jpg"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
 model="isnet-general-use"
@@ -37,6 +39,7 @@ options = vision.ImageSegmenterOptions(base_options=base_options,running_mode=Vi
 
 #neckalce image
 img = cv2.imread(input_path,cv2.IMREAD_UNCHANGED)
+# cv2.imshow("neckalce",img)
 #human image
 human_image=cv2.imread(human_path,cv2.IMREAD_UNCHANGED)
 
@@ -46,7 +49,7 @@ with vision.ImageSegmenter.create_from_options(options) as segmenter:
     segmentation_result = segmenter.segment(human_image_tf)
 human_image=human_image_tf.numpy_view().copy()
 
-face_cascade = cv2.CascadeClassifier('D:\\VTON\\data\\haarcascades\\haarcascade_frontalface_default.xml')
+# face_cascade = cv2.CascadeClassifier('D:\\VTON\\data\\haarcascades\\haarcascade_frontalface_default.xml')
 # smile_cascade = cv2.CascadeClassifier('D:\\VTON\\Models\selfie_multiclass_256x256\\OpenCV\\data\\haarcascades\\haarcascade_smile.xml')
 
 # Initialize the FaceDetector object
@@ -56,68 +59,6 @@ detector = FaceDetector(minDetectionCon=0.5, modelSelection=1)
 
 
 
-def detect_reapply_face(frame,nose_slope,nose_thorax_scale):
-    
-    print ("in detect_reapply_face")
-
-    # cv2.imshow("Frame",frame)
-
-    print(frame.shape)
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # cv2.imshow("Gray",gray)
-    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
-    img, bboxs = detector.findFaces(frame, draw=False)
-    
-    x, y, w, h = bboxs[0]['bbox']
-    
-    nose_slope_degrees=math.degrees(math.atan(nose_slope))
-    if (nose_slope_degrees)>0 and (nose_slope_degrees<=60):
-        print("0<slope<60")
-        y=y
-        x=x-round(40/(0.4)*nose_thorax_scale)
-        h=round(h)-round(30/(0.4)*nose_thorax_scale)
-        w=round(w)-round(20/(0.4)*nose_thorax_scale)
-        
-    elif (nose_slope_degrees)>60 and (nose_slope_degrees<90):
-        print("60<slope<90")
-        y=y
-        x=x-round(40/(0.4)*nose_thorax_scale)
-        h=round(h)-round(30/(0.4)*nose_thorax_scale)
-        w=round(w)
-        
-    elif ((nose_slope_degrees)>90 or (nose_slope_degrees<=0 and nose_slope_degrees<-70)):
-        print("-70<slope<=0 ")
-        y=y
-        x=x-round(40/(0.4)*nose_thorax_scale)
-        h=round(h)-round(30/(0.4)*nose_thorax_scale)
-        w=round(w)+round(40/(0.4)*nose_thorax_scale)
-       
-    elif (nose_slope_degrees<=0 and nose_slope_degrees>=-70):
-        print("slope>= -70 ")
-        y=y
-        x=x+round(10/(0.4)*nose_thorax_scale)
-        h=round(h)-round(30/(0.4)*nose_thorax_scale)
-        w=round(w)
-        
-    print(nose_slope_degrees)
-    print(nose_thorax_scale)
-    
-    
-    # if (w>h):
-        # delta=w-h
-        # w=w-delta
-    
-    # if (h>w):
-        # delta=h-w
-        # h=h-delta
-    
-    
-    print (x,y,w,h)   
-    img=frame[y:y+h,x:x+w,:]
-    cv2.imshow("CVDetecting",img)
-    print (x,y,w,h)
-    print(img.shape)
-    return y,x,img
     
 
 def detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_result):
@@ -160,20 +101,34 @@ def create_mask_img(img):
     # alpha_matting_base_size=100,
     # )
     
-    
-    bg = remove(img,session=session)
+    img_copy=cv2.cvtColor(img.copy(), cv2.COLOR_BGR2BGRA)
+    # cv2.imshow("img_copy",img_copy)
+    bg = remove(img,
+    session=session)
     img_black_bg=bg.copy()
     
     # cv2.imshow("bgremove",bg)
     img_gray = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY)
-    
+   
+    # cv2.imshow("img_gray",img_gray)
     ret, mask = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     mask = cv2.bitwise_not(mask) #we need to set those regions to remove as black
     mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB) #mask to rgb mask to get True/False
-    h_bg, w_bg = bg.shape[0], bg.shape[1]
-    mask_black = np.all(img_black_bg == [0, 0, 0, 0], axis=-1)
-    img_black_bg[mask_black]=[255,255,255,0]
-    return mask,img_black_bg
+    # cv2.imshow("maskrgb",mask)
+    bg_image = np.zeros(img_copy.shape, dtype=np.uint8)
+    bg_image[:] = [255,255,255,0]
+    # bg_image=cv2.cvtColor( bg_image, cv2.COLOR_RGB2RGBA)
+    # print(bg_image.shape)
+    mask_boolean = mask[:,:,0] == 0
+    
+    mask_rgb_boolean = np.stack([mask_boolean, mask_boolean, mask_boolean,mask_boolean], axis=2)
+    # print(mask_boolean.shape)
+    # print(mask_rgb_boolean.shape)
+    # print(img_copy.shape)
+    # sys.exit()
+    output_masked_image=np.where(mask_rgb_boolean,img_copy, bg_image)
+    
+    return mask,output_masked_image
 
 
 
@@ -270,26 +225,34 @@ mask,masked_image = create_mask_img(img)
 # }
 
 
-# # #necklace3.jpg
+# #necklace3.jpg
+jewellery_position={
+'thorax_top':[203,307],
+'thorax_bottom':[203,481],
+'thorax_midpoint':[0,0],
+'left_shoulder_pivot':[385,392],
+'right_shoulder_pivot':[25,392]
+}
+
+
+# ##necklace4.jpg
 # jewellery_position={
-# 'thorax_top':[203,307],
-# 'thorax_bottom':[203,481],
+# 'thorax_top':[225,298],
+# 'thorax_bottom':[225,525],
 # 'thorax_midpoint':[0,0],
 # 'left_shoulder_pivot':[385,392],
 # 'right_shoulder_pivot':[25,392]
 # }
 
 
-##necklace4.jpg
-
-
-jewellery_position={
-'thorax_top':[225,298],
-'thorax_bottom':[225,525],
-'thorax_midpoint':[0,0],
-'left_shoulder_pivot':[385,392],
-'right_shoulder_pivot':[25,392]
-}
+# ##necklace5.jpg
+# jewellery_position={
+# 'thorax_top':[245,160],
+# 'thorax_bottom':[245,409],
+# 'thorax_midpoint':[0,0],
+# 'left_shoulder_pivot':[385,392],
+# 'right_shoulder_pivot':[25,392]
+# }
 
 jewellery_xy_position={}
 jewellery_xy_position=xy_coordinate_positions(jewellery_position)
@@ -379,31 +342,31 @@ print(jewellery_position)
 
 
 # # human_image6
-face_position={
-    'eye_midpoint': [278, 122],
-    'left_eye': [346, 120],
-    'left_shoulder': [498, 424],
-    'nose': [276, 164],
-    'right_eye': [210, 123],
-    'right_shoulder': [80, 421],
-    'thorax_midpoint': [289, 422],
-    'left_shoulder_pivot':[0,0],
-    'right_shoulder_pivot':[0,0] 
-}
+# face_position={
+    # 'eye_midpoint': [278, 122],
+    # 'left_eye': [346, 120],
+    # 'left_shoulder': [498, 424],
+    # 'nose': [276, 164],
+    # 'right_eye': [210, 123],
+    # 'right_shoulder': [80, 421],
+    # 'thorax_midpoint': [289, 422],
+    # 'left_shoulder_pivot':[0,0],
+    # 'right_shoulder_pivot':[0,0] 
+# }
 
 
 # #human_image7
-# face_position={
-    # 'eye_midpoint': [276, 140],
-    # 'left_eye': [325, 137],
-    # 'left_shoulder': [437, 350],
-    # 'nose': [275, 166],
-    # 'right_eye': [228, 143],
-    # 'right_shoulder': [130, 335],
-    # 'thorax_midpoint': [284, 342],
-    # 'left_shoulder_pivot':[0,0],
-    # 'right_shoulder_pivot':[0,0]
-# }
+face_position={
+    'eye_midpoint': [276, 140],
+    'left_eye': [325, 137],
+    'left_shoulder': [437, 350],
+    'nose': [275, 166],
+    'right_eye': [228, 143],
+    'right_shoulder': [130, 335],
+    'thorax_midpoint': [284, 342],
+    'left_shoulder_pivot':[0,0],
+    'right_shoulder_pivot':[0,0]
+}
 
 
 #human_image8
@@ -520,9 +483,16 @@ jewellery_xy_position["image_width"]=jewellery_position["image_width"]
 jewellery_xy_position["image_height"]=jewellery_position["image_height"]
 jewellery_position=rescale_coordinates(jewellery_position,jewellery_resize_scale)
 jewellery_xy_position=rescale_coordinates(jewellery_xy_position,jewellery_resize_scale)
-masked_image=cv2.resize(masked_image, (jewellery_position["image_width"],jewellery_position["image_height"]), interpolation = cv2.INTER_AREA)
+# cv2.imshow("masked_image",masked_image)
+
+# masked_image=cv2.resize(masked_image, (jewellery_position["image_width"],jewellery_position["image_height"]), interpolation = cv2.INTER_LANCZOS4)
+# cv2.imshow("resized image opencv",masked_image)
 
 
+PIL_masked_image= Image.fromarray(cv2.cvtColor(masked_image, cv2.COLOR_BGRA2RGBA))
+PIL_masked_image=PIL_masked_image.resize((jewellery_position["image_width"],jewellery_position["image_height"]),Image.Resampling.LANCZOS )
+masked_image=cv2.cvtColor(np.array(PIL_masked_image), cv2.COLOR_RGBA2BGRA)
+cv2.imshow("resized masked_image_pillow",masked_image)
 
 
 for key in jewellery_position:

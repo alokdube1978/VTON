@@ -27,7 +27,7 @@ def click_event(event, x, y, flags, params):
 
 
 cv2.namedWindow("Image")
-cv2.createButton("Back",back,None,cv2.QT_PUSH_BUTTON,1)
+# cv2.createButton("Back",back,None,cv2.QT_PUSH_BUTTON,1)
 cv2.setMouseCallback("Image", click_event)
 img = cv2.imread(input_path,cv2.IMREAD_UNCHANGED)
 while True:
