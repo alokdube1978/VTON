@@ -10,6 +10,10 @@ import pprint
 # input_path = 'D:\\VTON\\overlay\\necklace-masked-img.png'
 
 input_path = 'D:\\VTON\\overlay\\necklace4.jpg'
+
+def back(*args):
+    pass
+
 def click_event(event, x, y, flags, params):
    global img
    if event == cv2.EVENT_LBUTTONDOWN:
@@ -21,7 +25,9 @@ def click_event(event, x, y, flags, params):
       # draw point on the image
       cv2.circle(img, (x,y), 30, (100,100,100), -1)
 
+
 cv2.namedWindow("Image")
+cv2.createButton("Back",back,None,cv2.QT_PUSH_BUTTON,1)
 cv2.setMouseCallback("Image", click_event)
 img = cv2.imread(input_path,cv2.IMREAD_UNCHANGED)
 while True:

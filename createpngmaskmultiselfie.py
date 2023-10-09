@@ -167,7 +167,7 @@ def create_mask_img(img):
     # cv2.imshow("bgremove",bg)
     img_gray = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY)
     
-    ret, mask = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY|cv2.THRESH_OTSU)
+    ret, mask = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     mask = cv2.bitwise_not(mask) #we need to set those regions to remove as black
     mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB) #mask to rgb mask to get True/False
     h_bg, w_bg = bg.shape[0], bg.shape[1]
