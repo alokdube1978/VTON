@@ -123,7 +123,7 @@ for key in positions:
 
 cv2.circle(imgOut,positions["thorax_midpoint"],radius=reduced_circle_radius,color=(0,0,255),thickness=1)
 
-cv2.imwrite("D:\\VTON\\overlay\\human_image9.jpg",imgOut)
+# cv2.imwrite("D:\\VTON\\overlay\\human_image9.jpg",imgOut)
 cv2.namedWindow("Masked Image")
 cv2.setMouseCallback("Masked Image", click_event)
 
