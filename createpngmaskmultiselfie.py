@@ -16,8 +16,8 @@ from cvzone.ClassificationModule import Classifier
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 model_path="D:\Python\VTON\\Models\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\Python\\VTON\\overlay\\human_image2.jpg'
-input_path = 'D:\\Python\\VTON\\overlay\\necklace4.jpg'
+human_path = 'D:\\VTON\\overlay\\human_image2.jpg'
+input_path = 'D:\\VTON\\overlay\\necklace4.jpg'
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
 model="isnet-general-use"
@@ -43,8 +43,8 @@ with vision.ImageSegmenter.create_from_options(options) as segmenter:
     segmentation_result = segmenter.segment(human_image_tf)
 human_image=human_image_tf.numpy_view().copy()
 
-face_cascade = cv2.CascadeClassifier('D:\\Python\\VTON\\data\\haarcascades\\haarcascade_frontalface_default.xml')
-# smile_cascade = cv2.CascadeClassifier('D:\\Python\\VTON\\Models\selfie_multiclass_256x256\\OpenCV\\data\\haarcascades\\haarcascade_smile.xml')
+face_cascade = cv2.CascadeClassifier('D:\\VTON\\data\\haarcascades\\haarcascade_frontalface_default.xml')
+# smile_cascade = cv2.CascadeClassifier('D:\\VTON\\Models\selfie_multiclass_256x256\\OpenCV\\data\\haarcascades\\haarcascade_smile.xml')
 
 # Initialize the FaceDetector object
 # minDetectionCon: Minimum detection confidence threshold
@@ -632,7 +632,7 @@ imgOverlay=detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentati
 
 
 cv2.imshow("Masked Image",imgOverlay)
-# cv2.imwrite("D:\\Python\\VTON\\overlay\\final_image.jpg",imgOverlay)
+# cv2.imwrite("D:\\VTON\\overlay\\final_image.jpg",imgOverlay)
 
 # final_image[:,:,:]=
 

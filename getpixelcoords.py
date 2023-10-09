@@ -7,9 +7,9 @@ import sys
 import pprint
 # import PIL
 
-# input_path = 'D:\\Python\\VTON\\overlay\\necklace-masked-img.png'
+# input_path = 'D:\\VTON\\overlay\\necklace-masked-img.png'
 
-input_path = 'D:\\Python\\VTON\\overlay\\necklace4.jpg'
+input_path = 'D:\\VTON\\overlay\\necklace4.jpg'
 def click_event(event, x, y, flags, params):
    global img
    if event == cv2.EVENT_LBUTTONDOWN:
