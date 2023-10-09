@@ -8,6 +8,15 @@ import pprint
 import math
 from cvzone.PoseModule import PoseDetector
 import mediapipe as mp
+# from mediapipe.python._framework_bindings import image
+# from mediapipe.python._framework_bindings import image_frame
+# from mediapipe.tasks.python import vision
+# from mediapipe import tasks
+
+input_path = 'D:\\VTON\\overlay\\public.jpg'
+output_path="D:\\VTON\\overlay\\human_image6.jpg"
+model_path="D:\\VTON\\Models\\selfie_multiclass_256x256.tflite"
+
 segmentor = SelfiSegmentation(model=0)
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
@@ -20,18 +29,38 @@ detector = PoseDetector(staticMode=False,
                         trackCon=0.5)
                         
  
-input_path = 'D:\\VTON\\overlay\\public4.jpg'
 
 mpDraw = mp.solutions.drawing_utils 
 mpPose = mp.solutions.pose  
 pose = mpPose.Pose() 
 
 
+# BG_COLOR = (255, 255, 255) # white
+# MASK_COLOR = (0, 0, 0) # black
+# #mediapipe initialization
+# BaseOptions = mp.tasks.BaseOptions
+
+# with open(model_path, 'rb') as f:
+    # model_data = f.read()
+# base_options = BaseOptions(model_asset_buffer=model_data)
+# ImageSegmenter = mp.tasks.vision.ImageSegmenter
+# ImageSegmenterOptions = mp.tasks.vision.ImageSegmenterOptions
+# VisionRunningMode = mp.tasks.vision.RunningMode
+
+# options = vision.ImageSegmenterOptions(base_options=base_options,running_mode=VisionRunningMode.IMAGE,
+                                              # output_category_mask=1)
 
 
 
 
-img = cv2.imread(input_path) 
+img = cv2.imread(input_path,cv2.IMREAD_UNCHANGED) 
+
+# #initialization of mediapipe selfie_multiclass
+# human_image_tf = mp.Image(image_format=mp.ImageFormat.SRGB, data=img)
+# with vision.ImageSegmenter.create_from_options(options) as segmenter:
+    # segmentation_result = segmenter.segment(human_image_tf)
+# img=human_image_tf.numpy_view().copy()
+# # cv2.imshow("Image",img)
 
 def slope_intercept(p1,p2):
 # print(p1,p2)
@@ -72,13 +101,19 @@ def get_midpoint(p1,p2):
     return midpoint
                         
 
-
-
+# def removebg(img,segmentation_result):
+    # category_mask = segmentation_result.category_mask
+    # category_mask_condition=np.stack((category_mask.numpy_view(),) * 3, axis=-1) > 0.7
+    # bg_image = np.zeros(img.shape, dtype=np.uint8)
+    # bg_image[:] = BG_COLOR
+    # output_image = np.where(category_mask_condition,  img,bg_image)
+    # return output_image
 
 
 imgOut = segmentor.removeBG(img, imgBg=(255, 255, 255), cutThreshold=0.4)
-
-
+# imgOut=removebg(img,segmentation_result)
+# cv2.imshow("imgout",imgOut)
+# sys.exit()
 # results = pose.process(imgOut)
 # pp.pprint("Results from process:")
 # pp.pprint(vars(results))
@@ -123,7 +158,7 @@ for key in positions:
 
 cv2.circle(imgOut,positions["thorax_midpoint"],radius=reduced_circle_radius,color=(0,0,255),thickness=1)
 
-# cv2.imwrite("D:\\VTON\\overlay\\human_image9.jpg",imgOut)
+cv2.imwrite(output_path,imgOut)
 cv2.namedWindow("Masked Image")
 cv2.setMouseCallback("Masked Image", click_event)
 

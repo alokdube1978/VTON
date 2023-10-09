@@ -15,8 +15,8 @@ from mediapipe import tasks
 from cvzone.ClassificationModule import Classifier
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
-model_path="D:\Python\VTON\\Models\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\VTON\\overlay\\human_image2.jpg'
+model_path="D:\\VTON\\Models\selfie_multiclass_256x256.tflite"
+human_path = 'D:\\VTON\\overlay\\human_image6.jpg'
 input_path = 'D:\\VTON\\overlay\\necklace4.jpg'
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
@@ -28,7 +28,10 @@ BaseOptions = mp.tasks.BaseOptions
 ImageSegmenter = mp.tasks.vision.ImageSegmenter
 ImageSegmenterOptions = mp.tasks.vision.ImageSegmenterOptions
 VisionRunningMode = mp.tasks.vision.RunningMode
-base_options = BaseOptions(model_asset_path=model_path)
+
+with open(model_path, 'rb') as f:
+    model_data = f.read()
+base_options = BaseOptions(model_asset_buffer=model_data)
 options = vision.ImageSegmenterOptions(base_options=base_options,running_mode=VisionRunningMode.IMAGE,
                                               output_category_mask=1)
 
@@ -335,17 +338,17 @@ print(jewellery_position)
 # }
 
 # #human_image2.jpg
-face_position={   
-    'eye_midpoint': [236, 348],
-    'left_eye': [289, 350],
-    'left_shoulder': [403, 559],
-    'nose': [236, 382],
-    'right_eye': [182, 345],
-    'right_shoulder': [64, 544],
-    'thorax_midpoint': [234, 552],
-    'left_shoulder_pivot':[0,0],
-    'right_shoulder_pivot':[0,0]
-}
+# face_position={   
+    # 'eye_midpoint': [236, 348],
+    # 'left_eye': [289, 350],
+    # 'left_shoulder': [403, 559],
+    # 'nose': [236, 382],
+    # 'right_eye': [182, 345],
+    # 'right_shoulder': [64, 544],
+    # 'thorax_midpoint': [234, 552],
+    # 'left_shoulder_pivot':[0,0],
+    # 'right_shoulder_pivot':[0,0]
+# }
 
 # human_image3.jpg
 # face_position={    
@@ -376,17 +379,17 @@ face_position={
 
 
 # # human_image6
-# face_position={
-    # 'eye_midpoint': [278, 122],
-    # 'left_eye': [346, 120],
-    # 'left_shoulder': [498, 424],
-    # 'nose': [276, 164],
-    # 'right_eye': [210, 123],
-    # 'right_shoulder': [80, 421],
-    # 'thorax_midpoint': [289, 422],
-    # 'left_shoulder_pivot':[0,0],
-    # 'right_shoulder_pivot':[0,0] 
-# }
+face_position={
+    'eye_midpoint': [278, 122],
+    'left_eye': [346, 120],
+    'left_shoulder': [498, 424],
+    'nose': [276, 164],
+    'right_eye': [210, 123],
+    'right_shoulder': [80, 421],
+    'thorax_midpoint': [289, 422],
+    'left_shoulder_pivot':[0,0],
+    'right_shoulder_pivot':[0,0] 
+}
 
 
 # #human_image7
