@@ -691,36 +691,18 @@ print(overlaypoint_x, overlaypoint_y)
 imgOverlay = cvzone.overlayPNG(human_image, perspective_masked_image, pos=[overlaypoint_x, overlaypoint_y])
 # cv2.imshow("IO",imgOverlay)
 
-# print (human_image_copy[372][709])
-# print (human_image_copy[709,:,:])
-# human_image_gray = cv2.cvtColor(human_image_copy, cv2.COLOR_BGR2GRAY)
-# ret, mask = cv2.threshold(human_image_gray, 251, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-# mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
-# cv2.imshow("Gray Mask",mask)
-# sys.exit()
-# print(imgOverlay[y1:y1+face_image.shape[0],x1:x1+face_image.shape[1],:].shape)
-
-
-# imgOverlay[y1:y1+face_image.shape[0],x1:x1+face_image.shape[1],:]=face_image[0:face_image.shape[0],0:face_image.shape[1],:]
-
 
 # cv2.imshow("Perspective",perspective_masked_image)
 
 imgOverlay=detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_result)
 
-
-# cv2.imshow("Human Image Copy",human_image_copy)
-# for b in range(248,256):
-    # for g in range(248,256):
-        # for r in range (248,256):
-            # color=(b,g,r)
-            # imgOverlay[np.all(human_image_copy == color,axis=-1)]=(255,255,255)
-            
-# imgOverlay[np.all(human_image == (255,255,255),axis=-1)]=(255,255,255)
-# human_image_filtered_copy[np.all(human_image_copy == (255,253,252),axis=-1)]=(0,255,0)          
+        
 
 
 cv2.imshow("Masked Image",imgOverlay)
+### use cv2.imencode to encode in format for rest api
+
+
 # cv2.imwrite("D:\\VTON\\overlay\\final_image.jpg",imgOverlay)
 
 # final_image[:,:,:]=
