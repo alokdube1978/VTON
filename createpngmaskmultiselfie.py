@@ -19,10 +19,10 @@ pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 model_path="D:\\VTON\\Models\selfie_multiclass_256x256.tflite"
 human_path = 'D:\\VTON\\overlay\\human_image7.jpg'
-input_path = "D:\\VTON\\overlay\\necklace3.jpg"
+input_path = "D:\\VTON\\overlay\\necklace8.png"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
-model="isnet-general-use"
+model="u2net"
 session=new_session(model)
 
 #mediapipe initialization
@@ -39,6 +39,10 @@ options = vision.ImageSegmenterOptions(base_options=base_options,running_mode=Vi
 
 #neckalce image
 img = cv2.imread(input_path,cv2.IMREAD_UNCHANGED)
+checkimage=Image.open(input_path)
+print(checkimage.format)
+print("img.shape")
+print(img.shape)
 # cv2.imshow("neckalce",img)
 #human image
 human_image=cv2.imread(human_path,cv2.IMREAD_UNCHANGED)
@@ -73,7 +77,35 @@ def detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_resu
 def rotate_image(image,rotation_point, angle):
   rot_mat = cv2.getRotationMatrix2D(rotation_point, angle, 1.0)
   result = cv2.warpAffine(image, rot_mat, image.shape[1::-1], flags=cv2.INTER_LINEAR)
-  return result      
+  return result 
+  
+  
+def create_mask_from_png_hsv(img):
+  hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+  lower_white = np.array([0,0,168], dtype=np.uint8)
+  upper_white = np.array([172,111,255], dtype=np.uint8)
+  
+  print(hsv.shape)
+  print(img.shape)
+  img_copy=cv2.cvtColor(img.copy(), cv2.COLOR_BGR2BGRA)
+  
+  print(img_copy.shape)
+  # print(img_copy[10][10])
+  bg_image = np.zeros(img_copy.shape, dtype=np.uint8)
+  bg_image[:] = [192,192,192,0]
+  white_pixels_mask = np.all(img_copy == [255, 255, 255,255], axis=-1)
+  white_pixels_mask_rgba = np.stack([white_pixels_mask, white_pixels_mask, white_pixels_mask,white_pixels_mask], axis=2)
+  
+  hsv_white_mask = cv2.inRange(hsv, lower_white, upper_white)
+  hsv_white_mask = cv2.bitwise_not(hsv_white_mask)
+  print(hsv_white_mask.shape)
+  print(hsv_white_mask[10][10])
+  # output_masked_image=np.where(white_pixels_mask_rgba,bg_image,img_copy)
+  
+  output_masked_image=cv2.bitwise_and(img_copy, img_copy, mask = hsv_white_mask)
+  cv2.imshow("PNG white removed",output_masked_image)
+  return hsv_white_mask,output_masked_image
+  # sys.exit()
    
 
 def create_mask_img(img):
@@ -110,13 +142,18 @@ def create_mask_img(img):
     # cv2.imshow("bgremove",bg)
     img_gray = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY)
    
-    # cv2.imshow("img_gray",img_gray)
+    
     ret, mask = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    # cv2.imshow("threshold mask",mask)
+    # mask=cv2.threshold
     mask = cv2.bitwise_not(mask) #we need to set those regions to remove as black
     mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB) #mask to rgb mask to get True/False
-    # cv2.imshow("maskrgb",mask)
+    cv2.imshow("maskrgb",mask)
     bg_image = np.zeros(img_copy.shape, dtype=np.uint8)
     bg_image[:] = [255,255,255,0]
+    
+    bg_image2= np.zeros(img_copy.shape, dtype=np.uint8)
+    bg_image2[:] = [192,192,192,0]
     # bg_image=cv2.cvtColor( bg_image, cv2.COLOR_RGB2RGBA)
     # print(bg_image.shape)
     mask_boolean = mask[:,:,0] == 0
@@ -127,6 +164,24 @@ def create_mask_img(img):
     # print(img_copy.shape)
     # sys.exit()
     output_masked_image=np.where(mask_rgb_boolean,img_copy, bg_image)
+    # cv2.imshow("without white filter",output_masked_image)
+    # print(output_masked_image.shape)
+    output_masked_image2=cv2.cvtColor(output_masked_image,cv2.COLOR_BGRA2BGR)
+    white_pixels_mask = np.all(output_masked_image == [255, 255, 255,0], axis=-1)
+    white_pixels_mask_rgba = np.stack([white_pixels_mask, white_pixels_mask, white_pixels_mask,white_pixels_mask], axis=2)
+    output_masked_image=np.where(white_pixels_mask_rgba,bg_image,img_copy)
+    # print(white_pixels_mask.shape)
+    
+    # for b in range(248,256):
+        # for g in range(248,256):
+            # for r in range (248,256):
+                # color=(b,g,r,)
+                # output_masked_image2[np.all(output_masked_image2 == color,axis=-1)]=(192,192,192)
+   
+    output_masked_image2=np.where(white_pixels_mask_rgba,bg_image2,img_copy)
+    cv2.imshow("mask with white filter",output_masked_image2)
+    # sys.exit()
+    
     
     return mask,output_masked_image
 
@@ -194,10 +249,19 @@ def slope_intercept(p1,p2):
 cv2.namedWindow("Masked Image")
 cv2.moveWindow("Masked Image", 10,10)
 human_image_copy=human_image.copy()
-mask,masked_image = create_mask_img(img)
+
+
+if (checkimage.format=="PNG") and (img.shape[2]==4):
+    masked_image=img
+    print("Jewellery Image is PNG and has Alpha - using it directly as mask")
+else:
+    mask,masked_image=create_mask_img(img)
+
+
+# masked_image=cv2.cvtColor( img, cv2.COLOR_BGR2BGRA)
+# mask,masked_image = create_mask_from_png(img)
 # cv2.imwrite(masked_path,masked_image)
 # sys.exit()
-# print(masked_image.shape)
 # print(masked_image[0][0])
 
 # print(masked_image.shape)
@@ -208,8 +272,8 @@ mask,masked_image = create_mask_img(img)
 
 #necklace1.jpg
 # jewellery_position={
-# 'thorax_top':[404,270],
-# 'thorax_bottom':[404,690],
+# 'thorax_top':[404,320],
+# 'thorax_bottom':[404,740],
 # 'thorax_midpoint':[0,0],
 # 'left_shoulder_pivot':[794,456],
 # 'right_shoulder_pivot':[5,456]
@@ -226,13 +290,13 @@ mask,masked_image = create_mask_img(img)
 
 
 # #necklace3.jpg
-jewellery_position={
-'thorax_top':[203,307],
-'thorax_bottom':[203,481],
-'thorax_midpoint':[0,0],
-'left_shoulder_pivot':[385,392],
-'right_shoulder_pivot':[25,392]
-}
+# jewellery_position={
+# 'thorax_top':[203,307],
+# 'thorax_bottom':[203,481],
+# 'thorax_midpoint':[0,0],
+# 'left_shoulder_pivot':[385,392],
+# 'right_shoulder_pivot':[25,392]
+# }
 
 
 # ##necklace4.jpg
@@ -254,6 +318,25 @@ jewellery_position={
 # 'right_shoulder_pivot':[25,392]
 # }
 
+
+# ##necklace6.jpg
+# jewellery_position={
+# 'thorax_top':[111,40],
+# 'thorax_bottom':[111,240],
+# 'thorax_midpoint':[0,0],
+# 'left_shoulder_pivot':[385,392],
+# 'right_shoulder_pivot':[25,392]
+# }
+
+# ##necklace8.png
+jewellery_position={
+'thorax_top':[180,90],
+'thorax_bottom':[180,275],
+'thorax_midpoint':[0,0],
+'left_shoulder_pivot':[385,392],
+'right_shoulder_pivot':[25,392]
+}
+
 jewellery_xy_position={}
 jewellery_xy_position=xy_coordinate_positions(jewellery_position)
 jewellery_xy_position["thorax_midpoint"]=[round((jewellery_xy_position["thorax_top"][0]+jewellery_xy_position["thorax_bottom"][0])/2),round((jewellery_xy_position["thorax_top"][1]+jewellery_xy_position["thorax_bottom"][1])/2)]
@@ -271,8 +354,8 @@ jewellery_position['right_left_shoulder_pivot_distance']=math.dist(jewellery_xy_
 jewellery_xy_position['thorax_top_bottom_distance']=jewellery_position['thorax_top_bottom_distance']
 jewellery_xy_position['right_left_shoulder_pivot_distance']=jewellery_position['right_left_shoulder_pivot_distance']
 jewellery_position=img_position_from_xy_coordinate_positions(jewellery_xy_position)
-print("----Jewellery Position----")
-print(jewellery_position)
+# print("----Jewellery Position----")
+# print(jewellery_position)
 
 # # human_image.jpg
 # face_position={   
@@ -301,17 +384,17 @@ print(jewellery_position)
 # }
 
 # #human_image2.jpg
-# face_position={   
-    # 'eye_midpoint': [236, 348],
-    # 'left_eye': [289, 350],
-    # 'left_shoulder': [403, 559],
-    # 'nose': [236, 382],
-    # 'right_eye': [182, 345],
-    # 'right_shoulder': [64, 544],
-    # 'thorax_midpoint': [234, 552],
-    # 'left_shoulder_pivot':[0,0],
-    # 'right_shoulder_pivot':[0,0]
-# }
+face_position={   
+    'eye_midpoint': [236, 348],
+    'left_eye': [289, 350],
+    'left_shoulder': [403, 559],
+    'nose': [236, 382],
+    'right_eye': [182, 345],
+    'right_shoulder': [64, 544],
+    'thorax_midpoint': [234, 552],
+    'left_shoulder_pivot':[0,0],
+    'right_shoulder_pivot':[0,0]
+}
 
 # human_image3.jpg
 # face_position={    
@@ -407,13 +490,13 @@ face_xy_position["thorax_top_bottom_distance"]=reduced_circle_radius*2
 
 
 nose_slope,nose_intercept=slope_intercept(face_xy_position["nose"],face_xy_position["thorax_midpoint"])
-print("----nose slope,intercept----")
-print (nose_slope,nose_intercept)
-print (math.degrees(math.atan(nose_slope)))
+# print("----nose slope,intercept----")
+# print (nose_slope,nose_intercept)
+# print (math.degrees(math.atan(nose_slope)))
 
 shoulder_slope,shoulder_intercept=slope_intercept(face_xy_position["left_shoulder"],face_xy_position["right_shoulder"])
-print("----shoulder slope,intercept----")
-print (shoulder_slope,shoulder_intercept)
+# print("----shoulder slope,intercept----")
+# print (shoulder_slope,shoulder_intercept)
 
 
 face_xy_position["thorax_top"]=[0,0]
@@ -455,8 +538,8 @@ else:
 
 face_position=img_position_from_xy_coordinate_positions(face_xy_position)
 
-print("-----Face Coordinates-----")
-print(face_position)
+# print("-----Face Coordinates-----")
+# print(face_position)
 
 for key in face_position:
      if isinstance(face_position[key], list):
@@ -473,8 +556,8 @@ cv2.circle(human_image,face_position["thorax_midpoint"],radius=reduced_circle_ra
 
 jewellery_resize_scale=face_position["thorax_top_bottom_distance"]/jewellery_position["thorax_top_bottom_distance"]
 
-print("-----Jewellery Resize Scale-----")
-print(jewellery_resize_scale)
+# print("-----Jewellery Resize Scale-----")
+# print(jewellery_resize_scale)
 
 
 jewellery_position["image_width"] = masked_image.shape[1]
@@ -503,8 +586,8 @@ for key in jewellery_position:
 cv2.circle(masked_image,jewellery_position["thorax_midpoint"],radius=round(jewellery_position['thorax_top_bottom_distance']/2),color=(0,0,255),thickness=1)
 
 cv2.imshow("mask",masked_image)
-print("-----Jewellery Scaled Coordinates-----")
-print(jewellery_position)
+# print("-----Jewellery Scaled Coordinates-----")
+# print(jewellery_position)
 jewellery_to_human_image_midpoint_offset=[0,0]
 jewellery_to_human_image_midpoint_offset[0]=face_position["thorax_midpoint"][0]-jewellery_position["thorax_midpoint"][0]
 jewellery_to_human_image_midpoint_offset[1]=face_position["thorax_midpoint"][1]-jewellery_position["thorax_midpoint"][1]
@@ -512,8 +595,8 @@ jewellery_to_human_image_midpoint_offset[1]=face_position["thorax_midpoint"][1]-
 jewellery_transform_final_points=offset_coordinates(face_position,jewellery_to_human_image_midpoint_offset[0],jewellery_to_human_image_midpoint_offset[1])
 
 
-print("-----Jewellery Transform Coordinates-----")
-print(jewellery_transform_final_points)
+# print("-----Jewellery Transform Coordinates-----")
+# print(jewellery_transform_final_points)
 
 
 input_pts=np.float32([jewellery_position["left_shoulder_pivot"],jewellery_position["thorax_top"],jewellery_position["right_shoulder_pivot"],jewellery_position["thorax_bottom"]])
@@ -532,10 +615,10 @@ important_points=np.float32([
 
 ])
 transformed_important_points=cv2.perspectiveTransform(important_points,M)
-print("transformed points")
-print(important_points)
-print("<==>")
-print(transformed_important_points)
+# print("transformed points")
+# print(important_points)
+# print("<==>")
+# print(transformed_important_points)
 
 yadd=0
 xadd=0
