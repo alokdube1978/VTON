@@ -18,11 +18,11 @@ from cvzone.ClassificationModule import Classifier
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 model_path="D:\\VTON\\Models\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\VTON\\overlay\\human_image7.jpg'
-input_path = "D:\\VTON\\overlay\\necklace8.png"
+human_path = 'D:\\VTON\\overlay\\human_image8.jpg'
+input_path = "D:\\VTON\\overlay\\necklace9.png"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
-model="u2net"
+model="isnet-general-use"
 session=new_session(model)
 
 #mediapipe initialization
@@ -139,7 +139,7 @@ def create_mask_img(img):
     session=session)
     img_black_bg=bg.copy()
     
-    # cv2.imshow("bgremove",bg)
+    cv2.imshow("bgremove",bg)
     img_gray = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY)
    
     
@@ -150,7 +150,7 @@ def create_mask_img(img):
     mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB) #mask to rgb mask to get True/False
     cv2.imshow("maskrgb",mask)
     bg_image = np.zeros(img_copy.shape, dtype=np.uint8)
-    bg_image[:] = [255,255,255,0]
+    bg_image[:] = [MASK_COLOR[0],MASK_COLOR[1],MASK_COLOR[2],0]
     
     bg_image2= np.zeros(img_copy.shape, dtype=np.uint8)
     bg_image2[:] = [192,192,192,0]
@@ -167,17 +167,13 @@ def create_mask_img(img):
     # cv2.imshow("without white filter",output_masked_image)
     # print(output_masked_image.shape)
     output_masked_image2=cv2.cvtColor(output_masked_image,cv2.COLOR_BGRA2BGR)
-    white_pixels_mask = np.all(output_masked_image == [255, 255, 255,0], axis=-1)
+    lower_white = np.array([240,240,240,0], dtype=np.uint8)
+    upper_white = np.array([255,255,255,255], dtype=np.uint8)
+    white_pixels_mask = cv2.inRange(output_masked_image,lower_white,upper_white)
+   
     white_pixels_mask_rgba = np.stack([white_pixels_mask, white_pixels_mask, white_pixels_mask,white_pixels_mask], axis=2)
     output_masked_image=np.where(white_pixels_mask_rgba,bg_image,img_copy)
-    # print(white_pixels_mask.shape)
-    
-    # for b in range(248,256):
-        # for g in range(248,256):
-            # for r in range (248,256):
-                # color=(b,g,r,)
-                # output_masked_image2[np.all(output_masked_image2 == color,axis=-1)]=(192,192,192)
-   
+
     output_masked_image2=np.where(white_pixels_mask_rgba,bg_image2,img_copy)
     cv2.imshow("mask with white filter",output_masked_image2)
     # sys.exit()
@@ -252,11 +248,21 @@ human_image_copy=human_image.copy()
 
 
 if (checkimage.format=="PNG") and (img.shape[2]==4):
-    masked_image=img
-    print("Jewellery Image is PNG and has Alpha - using it directly as mask")
+    
+    if (np.any(img[:,:,3]==0)):
+        print("Jewellery Image is PNG and has Alpha - using it directly as mask")
+        masked_image=img
+    else:
+        print("Jewellery Image is PNG and has Alpha - but the mask has no 0 alpha values")
+        mask,masked_image=create_mask_img(img)
+        
 else:
     mask,masked_image=create_mask_img(img)
+# pp.pprint(masked_image[0][0][3])
+# cv2.imshow("Mask",masked_image)
+# sys.exit()
 
+# mask,masked_image=create_mask_img(img)
 
 # masked_image=cv2.cvtColor( img, cv2.COLOR_BGR2BGRA)
 # mask,masked_image = create_mask_from_png(img)
@@ -328,14 +334,41 @@ else:
 # 'right_shoulder_pivot':[25,392]
 # }
 
+# ##necklace7.png
+# jewellery_position={
+# 'thorax_top':[128,93],
+# 'thorax_bottom':[128,293],
+# 'thorax_midpoint':[0,0],
+# 'left_shoulder_pivot':[385,392],
+# 'right_shoulder_pivot':[25,392]
+# }
+
 # ##necklace8.png
+# jewellery_position={
+# 'thorax_top':[180,90],
+# 'thorax_bottom':[180,275],
+# 'thorax_midpoint':[0,0],
+# 'left_shoulder_pivot':[385,392],
+# 'right_shoulder_pivot':[25,392]
+# }
+
+# ##necklace9.png
 jewellery_position={
-'thorax_top':[180,90],
-'thorax_bottom':[180,275],
+'thorax_top':[417,257],
+'thorax_bottom':[417,757],
 'thorax_midpoint':[0,0],
 'left_shoulder_pivot':[385,392],
 'right_shoulder_pivot':[25,392]
 }
+
+# ##necklace10.png
+# jewellery_position={
+# 'thorax_top':[143,111],
+# 'thorax_bottom':[143,301],
+# 'thorax_midpoint':[0,0],
+# 'left_shoulder_pivot':[385,392],
+# 'right_shoulder_pivot':[25,392]
+# }
 
 jewellery_xy_position={}
 jewellery_xy_position=xy_coordinate_positions(jewellery_position)
@@ -384,17 +417,17 @@ jewellery_position=img_position_from_xy_coordinate_positions(jewellery_xy_positi
 # }
 
 # #human_image2.jpg
-face_position={   
-    'eye_midpoint': [236, 348],
-    'left_eye': [289, 350],
-    'left_shoulder': [403, 559],
-    'nose': [236, 382],
-    'right_eye': [182, 345],
-    'right_shoulder': [64, 544],
-    'thorax_midpoint': [234, 552],
-    'left_shoulder_pivot':[0,0],
-    'right_shoulder_pivot':[0,0]
-}
+# face_position={   
+    # 'eye_midpoint': [236, 348],
+    # 'left_eye': [289, 350],
+    # 'left_shoulder': [403, 559],
+    # 'nose': [236, 382],
+    # 'right_eye': [182, 345],
+    # 'right_shoulder': [64, 544],
+    # 'thorax_midpoint': [234, 552],
+    # 'left_shoulder_pivot':[0,0],
+    # 'right_shoulder_pivot':[0,0]
+# }
 
 # human_image3.jpg
 # face_position={    
@@ -439,31 +472,31 @@ face_position={
 
 
 # #human_image7
-face_position={
-    'eye_midpoint': [276, 140],
-    'left_eye': [325, 137],
-    'left_shoulder': [437, 350],
-    'nose': [275, 166],
-    'right_eye': [228, 143],
-    'right_shoulder': [130, 335],
-    'thorax_midpoint': [284, 342],
-    'left_shoulder_pivot':[0,0],
-    'right_shoulder_pivot':[0,0]
-}
-
-
-#human_image8
 # face_position={
-    # 'eye_midpoint': [176, 228],
-    # 'left_eye': [246, 227],
-    # 'left_shoulder': [368, 512],
-    # 'nose': [174, 273],
-    # 'right_eye': [106, 228],
-    # 'right_shoulder': [-9, 513],
-    # 'thorax_midpoint': [180, 512],
+    # 'eye_midpoint': [276, 140],
+    # 'left_eye': [325, 137],
+    # 'left_shoulder': [437, 350],
+    # 'nose': [275, 166],
+    # 'right_eye': [228, 143],
+    # 'right_shoulder': [130, 335],
+    # 'thorax_midpoint': [284, 342],
     # 'left_shoulder_pivot':[0,0],
     # 'right_shoulder_pivot':[0,0]
 # }
+
+
+#human_image8
+face_position={
+    'eye_midpoint': [176, 228],
+    'left_eye': [246, 227],
+    'left_shoulder': [368, 512],
+    'nose': [174, 273],
+    'right_eye': [106, 228],
+    'right_shoulder': [-9, 513],
+    'thorax_midpoint': [180, 512],
+    'left_shoulder_pivot':[0,0],
+    'right_shoulder_pivot':[0,0]
+}
 
 #human_image9
 # face_position={

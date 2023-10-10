@@ -9,7 +9,7 @@ import pprint
 
 # input_path = 'D:\\VTON\\overlay\\necklace-masked-img.png'
 
-input_path = 'D:\\VTON\\overlay\\necklace8.png'
+input_path = 'D:\\VTON\\overlay\\necklace9.png'
 
 def back(*args):
     pass
