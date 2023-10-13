@@ -8,7 +8,7 @@ https://docs.opencv.org/4.x/d9/df8/tutorial_root.html
 also note all image arrays are of the form [y][x] and not [x][y] for pixel points 
 
 
-How to Run
+How to Run:
 python function_wrappers.py
 
 ***NOTE to Try different Jewellery Images***

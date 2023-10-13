@@ -45,8 +45,8 @@ import sys
 
     # ##necklace5.jpg
     # jewellery_position={
-    # 'thorax_top':[245,160],
-    # 'thorax_bottom':[245,409],
+    # 'thorax_top':[245,120],
+    # 'thorax_bottom':[245,369],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
@@ -99,14 +99,14 @@ import sys
     # }
 
 
-jewellery_image=cv2.imread("D:\\VTON\\overlay\\necklace7.png",cv2.IMREAD_UNCHANGED)
+jewellery_image=cv2.imread("D:\\VTON\\overlay\\necklace5.jpg",cv2.IMREAD_UNCHANGED)
 
 
 #copy paste values from list of jewellery_position values given above for relvant image
 ## For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7 above
 jewellery_position={
-    'thorax_top':[128,93],
-    'thorax_bottom':[128,293]
+    'thorax_top':[245,120],
+    'thorax_bottom':[245,369],
     }
 
 def get_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True):
@@ -120,7 +120,7 @@ def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELF
     return imgOut
     
 
-human_image=cv2.imread('D:\\VTON\\overlay\\public.jpg',cv2.IMREAD_UNCHANGED)
+human_image=cv2.imread('D:\\VTON\\overlay\\public3.jpg',cv2.IMREAD_UNCHANGED)
 # imgOut=get_preview_image(jewellery_image,jewellery_position)
 imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True)
 cv2.namedWindow("Image")
