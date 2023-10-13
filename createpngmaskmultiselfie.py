@@ -19,7 +19,7 @@ from cvzone.ClassificationModule import Classifier
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 model_path="D:\\VTON\\Models\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\VTON\\overlay\\public2.jpg'
+human_path = 'D:\\VTON\\overlay\\public3.jpg'
 input_path = "D:\\VTON\\overlay\\necklace8.png"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
@@ -396,12 +396,26 @@ def get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SE
     return imgOverlay
     
 
-def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True):
+def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False):
+    
     human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER)
     human_image_copy=human_image.copy()
     perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug=False)
+    
+    if (debug==True):
+        reduced_circle_radius=face_position["reduced_circle_radius"]
+        for key in face_position:
+             if isinstance(face_position[key], list):
+                # print(key)
+                cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
+
+        cv2.circle(human_image,face_position["thorax_midpoint"],radius=reduced_circle_radius,color=(255,0,0),thickness=1)
+        
+        
     imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
-    return imgOverlay    
+
+    
+    return imgOverlay  
     
 def main():
     img = cv2.imread(input_path,cv2.IMREAD_UNCHANGED)

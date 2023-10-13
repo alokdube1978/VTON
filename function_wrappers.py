@@ -103,12 +103,7 @@ app = Flask(__name__)
 
 
 
-#copy paste values from list of jewellery_position values given above for relvant image
-## For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7 above
-jewellery_position={
-    'thorax_top':[245,120],
-    'thorax_bottom':[245,369],
-    }
+
 
 def get_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True):
         
@@ -116,8 +111,8 @@ def get_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER
     return imgOut
 
 
-def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True):
-    imgOut=overlay.get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER)
+def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False):
+    imgOut=overlay.get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER,debug)
     return imgOut
 
 
@@ -125,17 +120,24 @@ def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELF
 def index():
     return 'Flask Webserver for Serving VTON'
 
-@app.route('/endpoint', methods=['GET'])
-def process():
+@app.route('/overlayimage', methods=['GET'])
+def overlayimage():
+    #copy paste values from list of jewellery_position values given above for relvant image
+    ## For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7 above
+    jewellery_position={
+        'thorax_top':[245,120],
+        'thorax_bottom':[245,369],
+        }
+        
     jewellery_image=cv2.imread("D:\\VTON\\overlay\\necklace5.jpg",cv2.IMREAD_UNCHANGED)
-    human_image=cv2.imread('D:\\VTON\\overlay\\public3.jpg',cv2.IMREAD_UNCHANGED)
-    imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True)
+    human_image=cv2.imread('D:\\VTON\\overlay\\public.jpg',cv2.IMREAD_UNCHANGED)
+    # imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
+   
+    imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
     # image_url = request.args.get('imageurl')
     # requested_url = urllib.urlopen(image_url)
     # image_array = np.asarray(bytearray(requested_url.read()), dtype=np.uint8)
     # img = cv2.imdecode(image_array, -1)
-
-    
     # Do some processing, get output_img
 
     retval, buffer = cv2.imencode('.png', imgOut)
@@ -143,6 +145,34 @@ def process():
     response.headers['Content-Type'] = 'image/png'
     return response
     
+
+
+
+
+@app.route('/preview', methods=['GET'])
+def preview():
+    # ##necklace8.png
+    jewellery_position={
+    'thorax_top':[180,90],
+    'thorax_bottom':[180,275]
+    }
+    
+    jewellery_image=cv2.imread("D:\\VTON\\overlay\\necklace8.png",cv2.IMREAD_UNCHANGED)
+    # human_image=cv2.imread('D:\\VTON\\overlay\\public.jpg',cv2.IMREAD_UNCHANGED)
+    imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
+   
+    # imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
+    # image_url = request.args.get('imageurl')
+    # requested_url = urllib.urlopen(image_url)
+    # image_array = np.asarray(bytearray(requested_url.read()), dtype=np.uint8)
+    # img = cv2.imdecode(image_array, -1)
+    # Do some processing, get output_img
+
+    retval, buffer = cv2.imencode('.png', imgOut)
+    response=make_response(buffer.tobytes())
+    response.headers['Content-Type'] = 'image/png'
+    return response
+
 
 if __name__ == '__main__':
     app.run(debug=True)
