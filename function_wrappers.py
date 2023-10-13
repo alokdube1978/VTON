@@ -1,6 +1,7 @@
 # import extractfacemaskfromimg as extract_face
-import createpngmaskmultiselfie as get_masked_image
+import createpngmaskmultiselfie as overlay
 import cv2
+import sys
 
 
     #necklace1.jpg
@@ -103,16 +104,22 @@ jewellery_position={
     'thorax_bottom':[180,275]
     }
 
-def get_preview_image(jewellery_image,jewellery_position):
+def get_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True):
         
-    imgOut=get_masked_image.get_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
+    imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER)
     return imgOut
 
 
+def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True):
+    imgOut=overlay.get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER)
+    return imgOut
+    
 jewellery_image=cv2.imread("D:\\VTON\\overlay\\necklace8.png",cv2.IMREAD_UNCHANGED)
-imgOut=get_preview_image(jewellery_image,jewellery_position)
-cv2.namedWindow("Preview Image")
-cv2.imshow("Preview Image", imgOut)   
+human_image=cv2.imread('D:\\VTON\\overlay\\public2.jpg',cv2.IMREAD_UNCHANGED)
+# imgOut=get_preview_image(jewellery_image,jewellery_position)
+imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False)
+cv2.namedWindow("Image")
+cv2.imshow("Image", imgOut)   
 cv2.waitKey(0) 
 cv2.destroyAllWindows()
 
