@@ -244,7 +244,7 @@ def get_jewellery_image_mask(img):
 
 
 def get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER=True):
-    human_image,face_position=extract_face.getSelfieImageandFaceLandMarkPoints(human_image,RUN_CV_SELFIE_SEGMENTER=True)
+    human_image,face_position=extract_face.getSelfieImageandFaceLandMarkPoints(human_image,RUN_CV_SELFIE_SEGMENTER)
     human_image_tf = mp.Image(image_format=mp.ImageFormat.SRGB, data=human_image)
     with vision.ImageSegmenter.create_from_options(options) as segmenter:
         segmentation_result = segmenter.segment(human_image_tf)

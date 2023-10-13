@@ -115,9 +115,9 @@ def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELF
     return imgOut
     
 jewellery_image=cv2.imread("D:\\VTON\\overlay\\necklace8.png",cv2.IMREAD_UNCHANGED)
-human_image=cv2.imread('D:\\VTON\\overlay\\public2.jpg',cv2.IMREAD_UNCHANGED)
+human_image=cv2.imread('D:\\VTON\\overlay\\public.jpg',cv2.IMREAD_UNCHANGED)
 # imgOut=get_preview_image(jewellery_image,jewellery_position)
-imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False)
+imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True)
 cv2.namedWindow("Image")
 cv2.imshow("Image", imgOut)   
 cv2.waitKey(0) 

@@ -99,10 +99,11 @@ def get_midpoint(p1,p2):
 
 
 def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
+    print(RUN_CV_SELFIE_SEGMENTER)
     global pose,detector,options,base_options
     xy_coordinate_positions={}
     if (RUN_CV_SELFIE_SEGMENTER==True):
-        imgOut = Selfie_segmentor.removeBG(img, imgBg=BG_COLOR, cutThreshold=0.45)
+        imgOut = Selfie_segmentor.removeBG(img, imgBg=BG_COLOR, cutThreshold=0.48)
     # cv2.imshow("Selfie Masked",imgOut)
     #we run it once more through mediapipe selife segmentor
     
