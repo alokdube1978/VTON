@@ -99,7 +99,6 @@ def get_midpoint(p1,p2):
 
 
 def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
-    print(RUN_CV_SELFIE_SEGMENTER)
     global pose,detector,options,base_options
     xy_coordinate_positions={}
     if (RUN_CV_SELFIE_SEGMENTER==True):
