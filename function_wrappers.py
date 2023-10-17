@@ -1,5 +1,5 @@
 import createpngmaskmultiselfie as overlay
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, render_template,redirect
 import base64
 import cv2
 import sys
@@ -27,8 +27,8 @@ app = Flask(__name__)
 
     # #necklace3.jpg
     # jewellery_position={
-    # 'thorax_top':[203,307],
-    # 'thorax_bottom':[203,481],
+    # 'thorax_top':[210,307],
+    # 'thorax_bottom':[210,481],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
@@ -116,21 +116,25 @@ def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELF
     return imgOut
 
 
+@app.route('/uploadfile', methods=['GET'])
+def uploadfile():
+    return render_template("uploadimage.html")
+
 @app.route('/', methods=['GET'])
 def index():
     return 'Flask Webserver for Serving VTON'
 
-@app.route('/overlayimage', methods=['GET'])
+@app.route('/overlayimage', methods=['GET','POST'])
 def overlayimage():
     #copy paste values from list of jewellery_position values given above for relvant image
     ## For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7 above
     jewellery_position={
-        'thorax_top':[245,120],
-        'thorax_bottom':[245,369],
+            'thorax_top':[210,307],
+            'thorax_bottom':[210,481],
         }
         
-    jewellery_image=cv2.imread("D:\\VTON\\overlay\\necklace5.jpg",cv2.IMREAD_UNCHANGED)
-    human_image=cv2.imread('D:\\VTON\\overlay\\public.jpg',cv2.IMREAD_UNCHANGED)
+    jewellery_image=cv2.imread("D:\\VTON\\overlay\\necklace3.jpg",cv2.IMREAD_UNCHANGED)
+    human_image=cv2.imread("D:\\VTON\\overlay\\human_image15.jpg",cv2.IMREAD_UNCHANGED)
     # imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
    
     imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
@@ -158,7 +162,7 @@ def preview():
     }
     
     jewellery_image=cv2.imread("D:\\VTON\\overlay\\necklace8.png",cv2.IMREAD_UNCHANGED)
-    # human_image=cv2.imread('D:\\VTON\\overlay\\public.jpg',cv2.IMREAD_UNCHANGED)
+    human_image=cv2.imread('D:\\VTON\\overlay\\public.jpg',cv2.IMREAD_UNCHANGED)
     imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
    
     # imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
