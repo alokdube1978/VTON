@@ -133,8 +133,8 @@ def overlayimage():
             'thorax_bottom':[210,481],
         }
         
-    jewellery_image=cv2.imread("D:\\VTON\\overlay\\necklace3.jpg",cv2.IMREAD_UNCHANGED)
-    human_image=cv2.imread("D:\\VTON\\overlay\\human_image15.jpg",cv2.IMREAD_UNCHANGED)
+    jewellery_image=cv2.imread("./overlay/necklace3.jpg",cv2.IMREAD_UNCHANGED)
+    human_image=cv2.imread("./overlay/human_image15.jpg",cv2.IMREAD_UNCHANGED)
     # imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
    
     imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
@@ -161,8 +161,8 @@ def preview():
     'thorax_bottom':[180,275]
     }
     
-    jewellery_image=cv2.imread("D:\\VTON\\overlay\\necklace8.png",cv2.IMREAD_UNCHANGED)
-    human_image=cv2.imread('D:\\VTON\\overlay\\public.jpg',cv2.IMREAD_UNCHANGED)
+    jewellery_image=cv2.imread("./overlay/necklace8.png",cv2.IMREAD_UNCHANGED)
+    human_image=cv2.imread('./overlay/public.jpg',cv2.IMREAD_UNCHANGED)
     imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
    
     # imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
