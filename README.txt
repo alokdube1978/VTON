@@ -15,3 +15,6 @@ python function_wrappers.py
 In function_wrappers.py to try different Jewellery:
 copy paste values from list of jewellery_position values given above for relvant image
 For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7 above
+
+
+
