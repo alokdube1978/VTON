@@ -9,7 +9,9 @@ also note all image arrays are of the form [y][x] and not [x][y] for pixel point
 
 
 How to Run:
-python function_wrappers.py
+sudo python function_wrappers.py
+
+Runs flask on port 80, please ensure it runs with sudo or change port in function_wrappers.py
 
 ***NOTE to Try different Jewellery Images***
 In function_wrappers.py to try different Jewellery:
