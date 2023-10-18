@@ -170,6 +170,7 @@ def index():
 def overlayimage():
     #copy paste values from list of jewellery_position values given above for relvant image
     ## For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7 above
+    #necklace3
     jewellery_position={
             'thorax_top':[210,307],
             'thorax_bottom':[210,481],
@@ -199,14 +200,14 @@ def overlayimage():
 
 @app.route('/preview', methods=['GET','POST'])
 def preview():
-    # ##necklace8.png
+    #necklace3.png
     jewellery_position={
-    'thorax_top':[180,90],
-    'thorax_bottom':[180,275]
-    }
+            'thorax_top':[210,307],
+            'thorax_bottom':[210,481],
+        }
     
-    jewellery_image=cv2.imread("./overlay/necklace8.png",cv2.IMREAD_UNCHANGED)
-    human_image=cv2.imread('./overlay/public.jpg',cv2.IMREAD_UNCHANGED)
+    jewellery_image=cv2.imread("./overlay/necklace3.jpg",cv2.IMREAD_UNCHANGED)
+    human_image=cv2.imread('./overlay/human_image15.jpg',cv2.IMREAD_UNCHANGED)
     human_image=resizeAndPad(human_image,(400,400))
     print(time.time(),file=sys.stderr, flush=True)
     imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
