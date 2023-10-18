@@ -41,8 +41,6 @@ options = vision.ImageSegmenterOptions(base_options=base_options,running_mode=Vi
 #neckalce image
 
 
-# face_cascade = cv2.CascadeClassifier('D:\\VTON\\data\\haarcascades\\haarcascade_frontalface_default.xml')
-# smile_cascade = cv2.CascadeClassifier('D:\\VTON\\Models\selfie_multiclass_256x256\\OpenCV\\data\\haarcascades\\haarcascade_smile.xml')
 
 # Initialize the FaceDetector object
 # minDetectionCon: Minimum detection confidence threshold
