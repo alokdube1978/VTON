@@ -179,9 +179,9 @@ def overlayimage():
     human_image=cv2.imread("./overlay/human_image15.jpg",cv2.IMREAD_UNCHANGED)
     human_image=resizeAndPad(human_image,(400,400))
     # imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
-    print(time.time())
+    print(time.time(),file=sys.stderr, flush=True)
     imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
-    print(time.time())
+    print(time.time(),file=sys.stderr, flush=True)
     # image_url = request.args.get('imageurl')
     # requested_url = urllib.urlopen(image_url)
     # image_array = np.asarray(bytearray(requested_url.read()), dtype=np.uint8)
@@ -197,7 +197,7 @@ def overlayimage():
 
 
 
-@app.route('/preview', methods=['GET'])
+@app.route('/preview', methods=['GET','POST'])
 def preview():
     # ##necklace8.png
     jewellery_position={
@@ -208,9 +208,9 @@ def preview():
     jewellery_image=cv2.imread("./overlay/necklace8.png",cv2.IMREAD_UNCHANGED)
     human_image=cv2.imread('./overlay/public.jpg',cv2.IMREAD_UNCHANGED)
     human_image=resizeAndPad(human_image,(400,400))
-    print(time.time())
+    print(time.time(),file=sys.stderr, flush=True)
     imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
-    print(time.time())
+    print(time.time(),file=sys.stderr, flush=True)
     # imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
     # image_url = request.args.get('imageurl')
     # requested_url = urllib.urlopen(image_url)
