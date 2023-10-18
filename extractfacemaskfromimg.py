@@ -13,9 +13,9 @@ from mediapipe.python._framework_bindings import image_frame
 from mediapipe.tasks.python import vision
 from mediapipe import tasks
 
-input_path = './overlay/public2.jpg'
-output_path="./overlay/human_image6.jpg"
-model_path="./Models/selfie_multiclass_256x256.tflite"
+input_path = 'D:\\VTON\\overlay\\public2.jpg'
+output_path="D:\\VTON\\overlay\\human_image6.jpg"
+model_path="D:\\VTON\\Models\\selfie_multiclass_256x256.tflite"
 
 
 
