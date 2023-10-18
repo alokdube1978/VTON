@@ -20,4 +20,3 @@ For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7
  
 
 
-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
