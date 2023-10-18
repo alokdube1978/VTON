@@ -18,9 +18,9 @@ from mediapipe import tasks
 from cvzone.ClassificationModule import Classifier
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
-model_path="D:\\VTON\\Models\\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\VTON\\overlay\\public3.jpg'
-input_path = "D:\\VTON\\overlay\\necklace8.png"
+model_path="./Models/selfie_multiclass_256x256.tflite"
+human_path = './overlay/public3.jpg'
+input_path = "./overlay/necklace8.png"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
 model="isnet-general-use"
