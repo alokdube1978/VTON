@@ -1,3 +1,5 @@
+===Installation Instructions (API based usage explained below)===
+
 Run pip install -r requirements.txt to get all dependencies
 
 all paths here are Windows based paths - please change them to Linux based
@@ -17,8 +19,10 @@ Runs flask on port 80, please ensure it runs with sudo or change port in functio
 In function_wrappers.py to try different Jewellery:
 copy paste values from list of jewellery_position values given above for relvant image
 For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7 above
- 
+===================================================
 
+ 
+===API based usage===
 API based usage:
 
 The APIs are hosted on vton.embitel.xyz
