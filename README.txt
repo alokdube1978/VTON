@@ -83,7 +83,7 @@ Sample code for actual overlay:
 
 
 The server is a flask wrapped server started via:
-nohup python function_wrappers.py &
+nohup sudo python function_wrappers.py &
 
 The server listens on port 80 
 
