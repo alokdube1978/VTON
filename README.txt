@@ -45,7 +45,7 @@ Sample Javascript Code params for usage:
                     }),
         }).done(function( data, textStatus, jqXHR ) {
 			console.log(data);
-            $("#image").attr('src', 'data:png/jpeg;base64,' + data.image); ///send the preview image back to front preview image placeholder
+            $("#image").attr('src', 'data:png/jpeg;base64,' + data.image); ///send the preview image back to front preview 									//image placeholder
         }).fail(function( jqXHR, textStatus, errorThrown ) {
             alert("fail: " + errorThrown);
         });
@@ -73,7 +73,7 @@ Sample code for actual overlay:
                     }),
         }).done(function( data, textStatus, jqXHR ) {
 			console.log(data);
-            $("#image").attr('src', 'data:png/jpeg;base64,' + data.image); ///send the preview image back to front preview image placeholder
+            $("#image").attr('src', 'data:png/jpeg;base64,' + data.image); ///send the final image back to front preview 										//image placeholder
         }).fail(function( jqXHR, textStatus, errorThrown ) {
             alert("fail: " + errorThrown);
         });
