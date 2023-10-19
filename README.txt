@@ -19,4 +19,70 @@ copy paste values from list of jewellery_position values given above for relvant
 For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7 above
  
 
+API based usage:
+
+The APIs are hosted on vton.embitel.xyz
+The "Preview Image" - to check if Jewellery thorax top and bottom are properly defined is at:
+http://vton.embitel.xyz/preview
+
+Sample Javascript Code params for usage:
+    points['thorax_top_x'] = X_thorax_top;
+    points['thorax_top_y'] = Y_thorax_top;
+    points['thorax_bottom_x'] = X_thorax_bottom;
+    points['thorax_bottom_y'] = Y_thorax_bottom;
+   	jewellery_image=base64encode(image) //this is the base64 encoded value of the jewellery image including the preceding "data:image/png;base64,.."
+    	$.ajax({
+            url: "http://vton.embitel.xyz/preview",
+            type: "POST",
+			         contentType: "application/json", //this is mandatory
+			         dataType: "json",
+		         	data: JSON.stringify({                     
+                        points: points,
+                        jewellery_image: jewellery_image                        
+
+                    }),
+        }).done(function( data, textStatus, jqXHR ) {
+			console.log(data);
+            $("#image").attr('src', 'data:png/jpeg;base64,' + data.image); ///send the preview image back to front preview image placeholder
+        }).fail(function( jqXHR, textStatus, errorThrown ) {
+            alert("fail: " + errorThrown);
+        });
+
+====Actual overlay on human image====
+The "final Image" - to overlay Jewellery on Human Image is defined at:
+http://vton.embitel.xyz/overlayimage
+Sample code for actual overlay:
+    points['thorax_top_x'] = X_thorax_top;
+    points['thorax_top_y'] = Y_thorax_top;
+    points['thorax_bottom_x'] = X_thorax_bottom;
+    points['thorax_bottom_y'] = Y_thorax_bottom;
+   	jewellery_image=base64encode(image) //this is the base64 encoded value of the jewellery image including the preceding "data:image/png;base64,.."
+    human_image=base64encode(image) //this is the base64 encoded value of the human image including the preceding "data:image/png;base64,.." , can be captured from webcam..
+    $.ajax({
+            url: "http://vton.embitel.xyz/overlayimage",
+            type: "POST",
+			         contentType: "application/json", //this is mandatory
+			         dataType: "json",
+		         	data: JSON.stringify({                     
+                        points: points,
+                        jewellery_image: jewellery_image,
+                        human_image: human_image
+
+                    }),
+        }).done(function( data, textStatus, jqXHR ) {
+			console.log(data);
+            $("#image").attr('src', 'data:png/jpeg;base64,' + data.image); ///send the preview image back to front preview image placeholder
+        }).fail(function( jqXHR, textStatus, errorThrown ) {
+            alert("fail: " + errorThrown);
+        });
+
+
+===================================================================================
+
+
+The server is a flask wrapped server started via:
+nohup python function_wrappers.py &
+
+The server listens on port 80 and processes the incoming data and overlays the jewellery_image on a demo image for preview image - when marking thorax points, or overlays jewellery_image on the final provided human_image when using the overlayimage end point
+
 
