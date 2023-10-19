@@ -21,7 +21,8 @@ Runs flask on port 80, please ensure it runs with sudo or change port in functio
  
 ===API based usage===
 API based usage:
-Note that all APIs are POST based - the GET methods on the APIs only return output on stock sample images - as placeholder
+Note that all APIs are POST based - 
+the GET methods on the APIs only return output on stock sample images - as placeholder
 The APIs are hosted on vton.embitel.xyz
 The "Preview Image" - to check if Jewellery thorax top and bottom are properly defined is at:
 http://vton.embitel.xyz/preview
@@ -85,8 +86,11 @@ The server is a flask wrapped server started via:
 nohup python function_wrappers.py &
 
 The server listens on port 80 
+
 and processes the incoming data and overlays the jewellery_image on a demo image 
+
 for preview image - when marking thorax points, 
+
 or overlays jewellery_image on the final provided human_image when using the overlayimage end point
 
 
