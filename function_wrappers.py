@@ -1,5 +1,6 @@
 import createpngmaskmultiselfie as overlay
-from flask import Flask, request, make_response, render_template,redirect
+from flask import Flask, request, make_response, render_template,redirect,jsonify
+from flask_cors import CORS, cross_origin
 import json
 import base64
 from codecs import encode
@@ -9,6 +10,7 @@ import time
 import sys
 import urllib
 app = Flask(__name__)
+CORS(app)
 
 
 def resizeAndPad(img, size, padColor=255):
@@ -192,33 +194,43 @@ def overlayimage():
     # Do some processing, get output_img
 
     retval, buffer = cv2.imencode('.png', imgOut)
-    response=make_response(buffer.tobytes())
-    response.headers['Content-Type'] = 'image/png'
-    return response
+    if (request.method=="POST"):
+        buffer_b64encoded = base64.b64encode(buffer)
+        data = { 
+                "status" : "success", 
+                "image" : buffer_b64encoded.decode('utf-8'), 
+            }
+        return jsonify(data)
+    else:
+        response=make_response(buffer.tobytes())
+        response.headers['Content-Type'] = 'image/png'
+        buffer_bytes=buffer.tobytes()
+        return response
+    
     
 
 
 
 
-@app.route('/preview', methods=['GET','POST'])
+@app.route('/preview', methods=['GET','POST','OPTIONS'])
 def preview():
     
-    print("Headers",file=sys.stderr, flush=True)
-    print(request.headers,file=sys.stderr, flush=True)
-    print("Cookies",file=sys.stderr, flush=True)
-    print(request.cookies,file=sys.stderr, flush=True)
+    # print("Headers",file=sys.stderr, flush=True)
+    # print(request.headers,file=sys.stderr, flush=True)
+    # print("Cookies",file=sys.stderr, flush=True)
+    # print(request.cookies,file=sys.stderr, flush=True)
     print("Data",file=sys.stderr, flush=True)
     print(request.data,file=sys.stderr, flush=True)
     print("Args",file=sys.stderr, flush=True)
     print(request.args,file=sys.stderr, flush=True)
     print("Form",file=sys.stderr, flush=True)
     print(request.form,file=sys.stderr, flush=True)
-    print("Endpoint",file=sys.stderr, flush=True)
-    print(request.endpoint,file=sys.stderr, flush=True)
-    print("Method",file=sys.stderr, flush=True)
-    print(request.method,file=sys.stderr, flush=True)
-    print("RemoteAddr",file=sys.stderr, flush=True)
-    print(request.remote_addr,file=sys.stderr, flush=True)
+    # print("Endpoint",file=sys.stderr, flush=True)
+    # print(request.endpoint,file=sys.stderr, flush=True)
+    # print("Method",file=sys.stderr, flush=True)
+    # print(request.method,file=sys.stderr, flush=True)
+    # print("RemoteAddr",file=sys.stderr, flush=True)
+    # print(request.remote_addr,file=sys.stderr, flush=True)
     
     #necklace8.png
     jewellery_position={
@@ -240,9 +252,18 @@ def preview():
     # Do some processing, get output_img
 
     retval, buffer = cv2.imencode('.png', imgOut)
-    response=make_response(buffer.tobytes())
-    response.headers['Content-Type'] = 'image/png'
-    return response
+    if (request.method=="POST"):
+        buffer_b64encoded = base64.b64encode(buffer)
+        data = { 
+                "status" : "success", 
+                "image" : buffer_b64encoded.decode('utf-8'), 
+            }
+        return jsonify(data)
+    else:
+        response=make_response(buffer.tobytes())
+        response.headers['Content-Type'] = 'image/png'
+        buffer_bytes=buffer.tobytes()
+        return response
 
 
 if __name__ == '__main__':
