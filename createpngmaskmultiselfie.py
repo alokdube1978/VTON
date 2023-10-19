@@ -232,10 +232,10 @@ def slope_intercept(p1,p2):
 def get_jewellery_image_mask(img):
     if (img.shape[2]==4):
         if (np.any(img[:,:,3]==0)):
-            print("Jewellery Image has Alpha - using it directly as mask")
+            print("Jewellery Image has Alpha - using it directly as mask",file=sys.stderr, flush=True)
             masked_image=img
         else:
-            print("Jewellery Image has Alpha - but the mask has no 0 alpha values")
+            print("Jewellery Image has Alpha - but the mask has no 0 alpha values",file=sys.stderr, flush=True)
             mask,masked_image=create_mask_img(img)
     else:
         mask,masked_image=create_mask_img(img)
@@ -388,8 +388,8 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
          if isinstance(face_position[key], list):
             # print(key)
             cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
-    print("get_sample_preview_image",file=sys.stderr, flush=True)
-    print(time.time(),file=sys.stderr, flush=True)
+    # print("get_sample_preview_image",file=sys.stderr, flush=True)
+    # print(time.time(),file=sys.stderr, flush=True)
     cv2.circle(human_image,face_position["thorax_midpoint"],radius=reduced_circle_radius,color=(255,0,0),thickness=1)
     cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),radius=3,color=(0,0,255),thickness=-1)
 

@@ -250,7 +250,7 @@ def preview():
         content = request.json
         # print("JSON input",file=sys.stderr, flush=True)
         # print(content,file=sys.stderr, flush=True)
-        print("Points")
+        print("Points",file=sys.stderr, flush=True)
         print(content['points'],file=sys.stderr, flush=True)
         jewellery_image= data_uri_to_cv2_img(content["jewellery_image"])
         jewellery_position={
@@ -267,7 +267,13 @@ def preview():
         jewellery_image=cv2.imread("./overlay/necklace8.png",cv2.IMREAD_UNCHANGED)
     
     human_image=cv2.imread('./overlay/public.jpg',cv2.IMREAD_UNCHANGED)
-    human_image=resizeAndPad(human_image,(400,400))
+    if (human_image.shape[0]>400 and human_image.shape[1]>400):
+        human_image=resizeAndPad(human_image,(400,400))
+        print("resizing human_image as both >400",file=sys.stderr, flush=True)
+    elif (human_image.shape[0]>600 or human_image.shape[1]>600):
+        human_image=resizeAndPad(human_image,(400,400))
+        print("resizing human_image as one >600",file=sys.stderr, flush=True)
+        
     print(time.time(),file=sys.stderr, flush=True)
     imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True)
     print(time.time(),file=sys.stderr, flush=True)
