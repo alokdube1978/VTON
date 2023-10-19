@@ -6,6 +6,7 @@ import base64
 from codecs import encode
 import numpy as np
 import cv2
+from waitress import serve
 import time
 import sys
 import urllib
@@ -322,7 +323,8 @@ def preview():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=80,debug=True)
+    # app.run(host='0.0.0.0',port=80,debug=True)
+    serve(app, host="0.0.0.0", port=80)
 
 
 
