@@ -87,10 +87,13 @@ nohup sudo python function_wrappers.py &
 
 The server listens on port 80 
 
-and processes the incoming data and overlays the jewellery_image on a demo image 
+and processes the incoming data and overlays the jewellery_image on a demo image/human_image 
 
-for preview image - when marking thorax points via admin panel (/preview)
 
-and it overlays jewellery_image on the final provided human_image when using the overlayimage end point (/overlayimage)
+/preview
+for preview image - when marking thorax points via admin panel
+
+/overlayimage
+it overlays jewellery_image on the final provided human_image when using the overlayimage end point
 
 
