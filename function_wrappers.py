@@ -182,17 +182,39 @@ def index():
 def overlayimage():
     if (request.method=="OPTIONS"):
         return
-    #copy paste values from list of jewellery_position values given above for relvant image
-    ## For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7 above
-    #necklace3
-    jewellery_position={
-            'thorax_top':[210,307],
-            'thorax_bottom':[210,481],
-        }
         
-    jewellery_image=cv2.imread("./overlay/necklace3.jpg",cv2.IMREAD_UNCHANGED)
-    human_image=cv2.imread("./overlay/human_image15.jpg",cv2.IMREAD_UNCHANGED)
-    human_image=resizeAndPad(human_image,(400,400))
+    if (request.method=="POST"):
+        content = request.json
+        # print("JSON input",file=sys.stderr, flush=True)
+        # print(content,file=sys.stderr, flush=True)
+        print("Points",file=sys.stderr, flush=True)
+        print(content['points'],file=sys.stderr, flush=True)
+        jewellery_image= data_uri_to_cv2_img(content["jewellery_image"])
+        human_image=data_uri_to_cv2_img(content["human_image"])
+        jewellery_position={
+            'thorax_top':[content['points']['thorax_top_x'],content['points']['thorax_top_y']],
+            'thorax_bottom':[content['points']['thorax_bottom_x'],content['points']['thorax_bottom_y']],
+            }
+    else:       
+        #copy paste values from list of jewellery_position values given above for relvant image
+        ## For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7 above
+        #necklace3
+        jewellery_position={
+                'thorax_top':[210,307],
+                'thorax_bottom':[210,481],
+            }
+            
+        jewellery_image=cv2.imread("./overlay/necklace3.jpg",cv2.IMREAD_UNCHANGED)
+        human_image=cv2.imread("./overlay/human_image15.jpg",cv2.IMREAD_UNCHANGED)
+        
+        
+    if (human_image.shape[0]>400 and human_image.shape[1]>400):
+        human_image=resizeAndPad(human_image,(400,400))
+        print("resizing human_image as both >400",file=sys.stderr, flush=True)
+    elif (human_image.shape[0]>800 or human_image.shape[1]>800):
+        human_image=resizeAndPad(human_image,(500,500))
+        print("resizing human_image as one width or heigh>800",file=sys.stderr, flush=True)
+        
     # imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
     print(time.time(),file=sys.stderr, flush=True)
     imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
