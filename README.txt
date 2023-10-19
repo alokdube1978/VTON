@@ -59,8 +59,10 @@ Sample code for actual overlay:
     points['thorax_top_y'] = Y_thorax_top;
     points['thorax_bottom_x'] = X_thorax_bottom;
     points['thorax_bottom_y'] = Y_thorax_bottom;
-   	jewellery_image=base64encode(image) //this is the base64 encoded value of the jewellery image including the 							//preceding "data:image/png;base64,.."
-    human_image=base64encode(human_image) //this is the base64 encoded value of the human image including the preceding 						//"data:image/png;base64,.." , can be captured from webcam..
+   	jewellery_image=base64encode(image) //this is the base64 encoded value of the jewellery image including the 							
+						//preceding "data:image/png;base64,.."
+    human_image=base64encode(human_image) //this is the base64 encoded value of the human image including the preceding 						
+						//"data:image/png;base64,.." , can be captured from webcam..
     $.ajax({
             url: "http://vton.embitel.xyz/overlayimage",
             type: "POST",
