@@ -1,6 +1,8 @@
 import createpngmaskmultiselfie as overlay
 from flask import Flask, request, make_response, render_template,redirect
+import json
 import base64
+from codecs import encode
 import numpy as np
 import cv2
 import time
@@ -200,13 +202,31 @@ def overlayimage():
 
 @app.route('/preview', methods=['GET','POST'])
 def preview():
-    #necklace3.png
+    
+    print("Headers",file=sys.stderr, flush=True)
+    print(request.headers,file=sys.stderr, flush=True)
+    print("Cookies",file=sys.stderr, flush=True)
+    print(request.cookies,file=sys.stderr, flush=True)
+    print("Data",file=sys.stderr, flush=True)
+    print(request.data,file=sys.stderr, flush=True)
+    print("Args",file=sys.stderr, flush=True)
+    print(request.args,file=sys.stderr, flush=True)
+    print("Form",file=sys.stderr, flush=True)
+    print(request.form,file=sys.stderr, flush=True)
+    print("Endpoint",file=sys.stderr, flush=True)
+    print(request.endpoint,file=sys.stderr, flush=True)
+    print("Method",file=sys.stderr, flush=True)
+    print(request.method,file=sys.stderr, flush=True)
+    print("RemoteAddr",file=sys.stderr, flush=True)
+    print(request.remote_addr,file=sys.stderr, flush=True)
+    
+    #necklace8.png
     jewellery_position={
-            'thorax_top':[210,307],
-            'thorax_bottom':[210,481],
+        'thorax_top':[180,90],
+        'thorax_bottom':[180,275],
         }
     
-    jewellery_image=cv2.imread("./overlay/necklace3.jpg",cv2.IMREAD_UNCHANGED)
+    jewellery_image=cv2.imread("./overlay/necklace8.png",cv2.IMREAD_UNCHANGED)
     human_image=cv2.imread('./overlay/human_image15.jpg',cv2.IMREAD_UNCHANGED)
     human_image=resizeAndPad(human_image,(400,400))
     print(time.time(),file=sys.stderr, flush=True)
