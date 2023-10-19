@@ -1,4 +1,5 @@
-===Installation Instructions (API based usage explained below)===
+===Installation Instructions (API based usage explained furtner below)===
+This SECTION is for installing the server on a new node - and not for API based usage
 
 Run pip install -r requirements.txt to get all dependencies
 
