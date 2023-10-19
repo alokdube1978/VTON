@@ -52,6 +52,9 @@ def resizeAndPad(img, size, padColor=255):
     scaled_img = cv2.copyMakeBorder(scaled_img, pad_top, pad_bot, pad_left, pad_right, borderType=cv2.BORDER_CONSTANT, value=padColor)
 
     return scaled_img
+    
+    
+    
     #necklace1.jpg
     # jewellery_position={
     # 'thorax_top':[404,320],
@@ -148,13 +151,17 @@ def resizeAndPad(img, size, padColor=255):
 
 
 
+def data_uri_to_cv2_img(uri):
+    encoded_data = uri.split(',')[1]
+    nparr = np.frombuffer(base64.b64decode(encoded_data), np.uint8)
+    # old (python 2 version):
+    # nparr = np.fromstring(encoded_data.decode('base64'), np.uint8)
+
+    img = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)
+    return img
 
 
 
-def get_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True):
-        
-    imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER)
-    return imgOut
 
 
 def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False):
@@ -170,8 +177,11 @@ def uploadfile():
 def index():
     return 'Flask Webserver for Serving VTON'
 
-@app.route('/overlayimage', methods=['GET','POST'])
+@app.route('/overlayimage', methods=['GET','POST','OPTIONS'])
+@cross_origin()
 def overlayimage():
+    if (request.method=="OPTIONS"):
+        return
     #copy paste values from list of jewellery_position values given above for relvant image
     ## For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7 above
     #necklace3
@@ -213,18 +223,19 @@ def overlayimage():
 
 
 @app.route('/preview', methods=['GET','POST','OPTIONS'])
+@cross_origin()
 def preview():
     
     # print("Headers",file=sys.stderr, flush=True)
     # print(request.headers,file=sys.stderr, flush=True)
     # print("Cookies",file=sys.stderr, flush=True)
     # print(request.cookies,file=sys.stderr, flush=True)
-    print("Data",file=sys.stderr, flush=True)
-    print(request.data,file=sys.stderr, flush=True)
-    print("Args",file=sys.stderr, flush=True)
-    print(request.args,file=sys.stderr, flush=True)
-    print("Form",file=sys.stderr, flush=True)
-    print(request.form,file=sys.stderr, flush=True)
+    # print("Data",file=sys.stderr, flush=True)
+    # print(request.data,file=sys.stderr, flush=True)
+    # print("Args",file=sys.stderr, flush=True)
+    # print(request.args,file=sys.stderr, flush=True)
+    # print("Form",file=sys.stderr, flush=True)
+    # print(request.form,file=sys.stderr, flush=True)
     # print("Endpoint",file=sys.stderr, flush=True)
     # print(request.endpoint,file=sys.stderr, flush=True)
     # print("Method",file=sys.stderr, flush=True)
@@ -232,17 +243,33 @@ def preview():
     # print("RemoteAddr",file=sys.stderr, flush=True)
     # print(request.remote_addr,file=sys.stderr, flush=True)
     
-    #necklace8.png
-    jewellery_position={
-        'thorax_top':[180,90],
-        'thorax_bottom':[180,275],
-        }
+    if (request.method=="OPTIONS"):
+        return
     
-    jewellery_image=cv2.imread("./overlay/necklace8.png",cv2.IMREAD_UNCHANGED)
-    human_image=cv2.imread('./overlay/human_image15.jpg',cv2.IMREAD_UNCHANGED)
+    if (request.method=="POST"):
+        content = request.json
+        # print("JSON input",file=sys.stderr, flush=True)
+        # print(content,file=sys.stderr, flush=True)
+        print("Points")
+        print(content['points'],file=sys.stderr, flush=True)
+        jewellery_image= data_uri_to_cv2_img(content["jewellery_image"])
+        jewellery_position={
+            'thorax_top':[content['points']['thorax_top_x'],content['points']['thorax_top_y']],
+            'thorax_bottom':[content['points']['thorax_bottom_x'],content['points']['thorax_bottom_y']],
+            }
+    else:
+        #necklace8.png
+        jewellery_position={
+            'thorax_top':[180,90],
+            'thorax_bottom':[180,275],
+            }
+        
+        jewellery_image=cv2.imread("./overlay/necklace8.png",cv2.IMREAD_UNCHANGED)
+    
+    human_image=cv2.imread('./overlay/public.jpg',cv2.IMREAD_UNCHANGED)
     human_image=resizeAndPad(human_image,(400,400))
     print(time.time(),file=sys.stderr, flush=True)
-    imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
+    imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True)
     print(time.time(),file=sys.stderr, flush=True)
     # imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
     # image_url = request.args.get('imageurl')
