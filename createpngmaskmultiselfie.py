@@ -19,7 +19,7 @@ from cvzone.ClassificationModule import Classifier
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 model_path="D:\\VTON\\Models\\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\VTON\\overlay\\public.jpg'
+human_path = 'D:\\VTON\\overlay\\public3.jpg'
 input_path = "D:\\VTON\\overlay\\necklace8.png"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
@@ -465,7 +465,7 @@ def main():
     # cv2.imshow("neckalce",img)
     #human image
     human_image=cv2.imread(human_path,cv2.IMREAD_UNCHANGED)
-    human_image=resizeAndPad(human_image,(400,400))
+    # human_image=resizeAndPad(human_image,(400,400))
     RUN_CV_SELFIE_SEGMENTER=True
     #initialization of mediapipe selfie_multiclass
     # cv2.imshow("selfie",human_image)
