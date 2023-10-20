@@ -125,8 +125,8 @@ def resizeAndPad(img, size, padColor=255):
 
     # ##necklace8.png
     # jewellery_position={
-    # 'thorax_top':[180,90],
-    # 'thorax_bottom':[180,320],
+    # 'thorax_top':[170,90],
+    # 'thorax_bottom':[170,320],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
@@ -283,8 +283,8 @@ def preview():
     else:
         #necklace8.png
         jewellery_position={
-            'thorax_top':[180,90],
-            'thorax_bottom':[180,320],
+            'thorax_top':[170,90],
+            'thorax_bottom':[170,320],
             }
         
         jewellery_image=cv2.imread("./overlay/necklace8.png",cv2.IMREAD_UNCHANGED)
