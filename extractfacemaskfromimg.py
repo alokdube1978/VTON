@@ -155,24 +155,28 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
     xy_coordinate_positions["thorax_top_bottom_distance"]=xy_coordinate_positions["reduced_circle_radius"]*2
     nose_slope,nose_intercept=slope_intercept(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
     shoulder_slope,shoulder_intercept=slope_intercept(xy_coordinate_positions["left_shoulder"],xy_coordinate_positions["right_shoulder"])
+    print("----nose slope,intercept----")
+    print (nose_slope,nose_intercept)
+    
     print("----shoulder slope,intercept----")
     print (shoulder_slope,shoulder_intercept)
     
    
     # print(math.sin(math.atan(shoulder_slope)))
-    if (nose_slope>=0):
-        xy_coordinate_positions["thorax_top"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.atan(nose_slope)))
-        xy_coordinate_positions["thorax_top"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.atan(nose_slope)))
-    else:
+    # print(math.sin(math.atan(shoulder_slope)))
+    if (nose_slope<=0):
         xy_coordinate_positions["thorax_top"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.pi+math.atan(nose_slope)))
         xy_coordinate_positions["thorax_top"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.pi+math.atan(nose_slope)))
-
-    if (nose_slope>=0):
-        xy_coordinate_positions["thorax_bottom"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.pi+math.atan(nose_slope)))
-        xy_coordinate_positions["thorax_bottom"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.pi+math.atan(nose_slope)))
     else:
+        xy_coordinate_positions["thorax_top"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.atan(nose_slope)))
+        xy_coordinate_positions["thorax_top"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.atan(nose_slope)))
+
+    if (nose_slope<=0):
         xy_coordinate_positions["thorax_bottom"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.atan(nose_slope)))
-        xy_coordinate_positions["thorax_bottom"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.atan(nose_slope)))    
+        xy_coordinate_positions["thorax_bottom"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.atan(nose_slope)))
+    else:
+        xy_coordinate_positions["thorax_bottom"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.pi+math.atan(nose_slope)))
+        xy_coordinate_positions["thorax_bottom"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.pi+math.atan(nose_slope)))    
 
 
     if (shoulder_slope<=0):
@@ -192,6 +196,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
         xy_coordinate_positions["left_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.atan(shoulder_slope)))
       
 
+    # print("reduced circle")
     print("reduced circle")
     print(xy_coordinate_positions["reduced_circle_radius"])
     positions=img_position_from_xy_coordinate_positions(xy_coordinate_positions)
