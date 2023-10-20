@@ -12,7 +12,7 @@ from mediapipe.python._framework_bindings import image
 from mediapipe.python._framework_bindings import image_frame
 from mediapipe.tasks.python import vision
 from mediapipe import tasks
-
+np.seterr(divide='ignore', invalid='ignore')
 input_path = './overlay/public2.jpg'
 output_path="./overlay/human_image6.jpg"
 model_path="./Models/selfie_multiclass_256x256.tflite"
@@ -54,7 +54,7 @@ BG_COLOR = (255, 255, 255) # white
 
 def slope_intercept(p1,p2):
 # print(p1,p2)
-    slope=(p2[1]-p1[1])/(p2[0]-p1[0])
+    slope=np.float64(p2[1]-p1[1])/(p2[0]-p1[0])
     # print(math.degrees(math.atan(slope)))
     intercept=p1[1]-slope*p1[0]
     return slope,intercept
@@ -132,13 +132,15 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
     "left_shoulder" : lmList[11][:2],
     "right_shoulder" : lmList[12][:2]
     }
-    # pp.pprint(positions)
+    # print("Positions",file=sys.stderr, flush=True)
+    # print(positions,file=sys.stderr, flush=True)
     xy_coordinate_positions=get_xy_coordinate_positions(positions)
     xy_coordinate_positions["thorax_top"]=[0,0]
     xy_coordinate_positions["thorax_bottom"]=[0,0]
     xy_coordinate_positions["right_shoulder_pivot"]=[0,0]
     xy_coordinate_positions["left_shoulder_pivot"]=[0,0]
-    # pp.pprint(xy_coordinate_positions)
+    # print("xy_coordinate_positions")
+    # print(xy_coordinate_positions,file=sys.stderr, flush=True)
     eye_midpoint=get_midpoint(xy_coordinate_positions["left_eye"],xy_coordinate_positions["right_eye"])
     thorax_midpoint=get_midpoint(xy_coordinate_positions["left_shoulder"],xy_coordinate_positions["right_shoulder"])
     xy_coordinate_positions["eye_midpoint"]=eye_midpoint
@@ -152,8 +154,8 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
     xy_coordinate_positions["thorax_top_bottom_distance"]=xy_coordinate_positions["reduced_circle_radius"]*2
     nose_slope,nose_intercept=slope_intercept(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
     shoulder_slope,shoulder_intercept=slope_intercept(xy_coordinate_positions["left_shoulder"],xy_coordinate_positions["right_shoulder"])
-    # print("----shoulder slope,intercept----")
-    # print (shoulder_slope,shoulder_intercept)
+    # print("----shoulder slope,intercept----",file=sys.stderr, flush=True)
+    # print (shoulder_slope,shoulder_intercept,file=sys.stderr, flush=True)
     
    
     # print(math.sin(math.atan(shoulder_slope)))
@@ -176,8 +178,8 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
         xy_coordinate_positions["right_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.pi+math.atan(shoulder_slope)))
         xy_coordinate_positions["right_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.pi+math.atan(shoulder_slope)))
     else:
-        xy_coordinate_positions["right_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.atan(shoulder_slope)))
-        xy_coordinate_positions["right_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.atan(shoulder_slope)))   
+        xy_coordinate_positions["right_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.pi+math.atan(shoulder_slope)))
+        xy_coordinate_positions["right_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.pi+math.atan(shoulder_slope)))   
 
 
 
@@ -185,14 +187,15 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
         xy_coordinate_positions["left_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.atan(shoulder_slope)))
         xy_coordinate_positions["left_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.atan(shoulder_slope)))
     else:
-        xy_coordinate_positions["left_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.pi+math.atan(shoulder_slope)))
-        xy_coordinate_positions["left_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.pi+math.atan(shoulder_slope)))
+        xy_coordinate_positions["left_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.atan(shoulder_slope)))
+        xy_coordinate_positions["left_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.atan(shoulder_slope)))
       
 
-    # pp.pprint("reduced circle")
-    # pp.pprint(xy_coordinate_positions["reduced_circle_radius"])
+    # print("reduced circle")
+    # print(xy_coordinate_positions["reduced_circle_radius"])
     positions=img_position_from_xy_coordinate_positions(xy_coordinate_positions)
-    # pp.pprint(positions)
+    # print ("Image postions",file=sys.stderr, flush=True)
+    # print(positions,file=sys.stderr, flush=True)
     return imgOut,positions
 
 
