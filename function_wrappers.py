@@ -281,15 +281,15 @@ def preview():
             'thorax_bottom':[content['points']['thorax_bottom_x'],content['points']['thorax_bottom_y']],
             }
     else:
-        #necklace8.png
+        #necklace7.png
         jewellery_position={
-            'thorax_top':[170,90],
-            'thorax_bottom':[170,320],
+                'thorax_top':[128,93],
+                'thorax_bottom':[128,293],
             }
         
-        jewellery_image=cv2.imread("./overlay/necklace8.png",cv2.IMREAD_UNCHANGED)
+        jewellery_image=cv2.imread("./overlay/necklace7.png",cv2.IMREAD_UNCHANGED)
     
-    human_image=cv2.imread('./overlay/public3.jpg',cv2.IMREAD_UNCHANGED)
+    human_image=cv2.imread('./overlay/human_image9.jpg',cv2.IMREAD_UNCHANGED)
     if (human_image.shape[0]>400 and human_image.shape[1]>400):
         human_image=resizeAndPad(human_image,(400,400))
         print("resizing human_image as both >400",file=sys.stderr, flush=True)
