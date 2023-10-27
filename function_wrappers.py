@@ -150,6 +150,24 @@ def resizeAndPad(img, size, padColor=255):
     # 'right_shoulder_pivot':[25,392]
     # }
 
+    # ##necklace11.png
+    # jewellery_position={
+    # 'thorax_top':[181,207],
+    # 'thorax_bottom':[175,384],
+    # 'thorax_midpoint':[0,0],
+    # 'left_shoulder_pivot':[385,392],
+    # 'right_shoulder_pivot':[25,392]
+    # }
+    
+    # ##necklace11.png
+    # jewellery_position={
+    # 'thorax_top':[175,187],
+    # 'thorax_bottom':[175,364],
+    # 'thorax_midpoint':[0,0],
+    # 'left_shoulder_pivot':[385,392],
+    # 'right_shoulder_pivot':[25,392]
+    # }
+
 
 
 def data_uri_to_cv2_img(uri):
@@ -165,7 +183,7 @@ def data_uri_to_cv2_img(uri):
 
 
 
-def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False):
+def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=True):
     imgOut=overlay.get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER,debug)
     return imgOut
 
@@ -196,18 +214,24 @@ def overlayimage():
             'thorax_top':[content['points']['thorax_top_x'],content['points']['thorax_top_y']],
             'thorax_bottom':[content['points']['thorax_bottom_x'],content['points']['thorax_bottom_y']],
             }
+        print("we have a human image",file=sys.stderr, flush=True) 
+        
+        
     else:       
         #copy paste values from list of jewellery_position values given above for relvant image
-        ## For exmaple, if using necklace7, use thorax_top and thorax_bottom from necklace7 above
-        #necklace3
+        ## For exmaple, if using necklace11, use thorax_top and thorax_bottom from necklace7 above
+        #necklace11
         jewellery_position={
-                'thorax_top':[210,307],
-                'thorax_bottom':[210,481],
-            }
+            'thorax_top':[162,180],
+            'thorax_bottom':[162,357],
+    }
             
-        jewellery_image=cv2.imread("./overlay/necklace3.jpg",cv2.IMREAD_UNCHANGED)
-        human_image=cv2.imread("./overlay/human_image15.jpg",cv2.IMREAD_UNCHANGED)
+        jewellery_image=cv2.imread("./overlay/necklace11.png",cv2.IMREAD_UNCHANGED)
+        human_image=cv2.imread("./overlay/human_image19.png",cv2.IMREAD_UNCHANGED)
         
+    if (human_image.shape[2]==4):
+        print("Converting PNG to BGR")
+        human_image=cv2.cvtColor(human_image, cv2.COLOR_BGRA2BGR)
         
     if (human_image.shape[0]>400 and human_image.shape[1]>400):
         human_image=resizeAndPad(human_image,(400,400))
@@ -283,13 +307,12 @@ def preview():
     else:
         #necklace7.png
         jewellery_position={
-                'thorax_top':[128,93],
-                'thorax_bottom':[128,293],
+                'thorax_top':[210,307],
+                'thorax_bottom':[210,481],
             }
-        
         jewellery_image=cv2.imread("./overlay/necklace7.png",cv2.IMREAD_UNCHANGED)
     
-    human_image=cv2.imread('./overlay/human_image9.jpg',cv2.IMREAD_UNCHANGED)
+    human_image=cv2.imread('./overlay/public3.jpg',cv2.IMREAD_UNCHANGED)
     if (human_image.shape[0]>400 and human_image.shape[1]>400):
         human_image=resizeAndPad(human_image,(400,400))
         print("resizing human_image as both >400",file=sys.stderr, flush=True)
