@@ -26,6 +26,7 @@ BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
 model="isnet-general-use"
 session=new_session(model)
+interested_points=["thorax_top","thorax_bottom","thorax_midpoint","right_shoulder_pivot","left_shoulder_pivot"]
 
 #mediapipe initialization
 BaseOptions = mp.tasks.BaseOptions
@@ -379,6 +380,7 @@ def overlay_jewellery_on_face(jewellery_position,face_position,human_image,persp
     
 def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True):
     # human_image=cv2.imread(human_path,cv2.IMREAD_UNCHANGED)
+    global interested_points
     human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER)
     human_image_copy=human_image.copy()
     perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug=True)
@@ -386,6 +388,7 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
     reduced_circle_radius=face_position["reduced_circle_radius"]
     for key in face_position:
          if isinstance(face_position[key], list):
+          if key in interested_points:
             # print(key)
             cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
     # print("get_sample_preview_image",file=sys.stderr, flush=True)
@@ -398,7 +401,7 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
     
 
 def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False):
-    
+    global interested_points
     human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER)
     human_image_copy=human_image.copy()
     perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug)
@@ -407,6 +410,7 @@ def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFI
     if (debug==True):
         for key in face_position:
              if isinstance(face_position[key], list):
+              if key in interested_points:
                 # print(key)
                 cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
 
