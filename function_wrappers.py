@@ -305,12 +305,12 @@ def preview():
             'thorax_bottom':[content['points']['thorax_bottom_x'],content['points']['thorax_bottom_y']],
             }
     else:
-        #necklace7.png
+        #necklace3.png
         jewellery_position={
                 'thorax_top':[210,307],
                 'thorax_bottom':[210,481],
             }
-        jewellery_image=cv2.imread("./overlay/necklace7.png",cv2.IMREAD_UNCHANGED)
+        jewellery_image=cv2.imread("./overlay/necklace3.jpg",cv2.IMREAD_UNCHANGED)
     
     human_image=cv2.imread('./overlay/public3.jpg',cv2.IMREAD_UNCHANGED)
     if (human_image.shape[0]>400 and human_image.shape[1]>400):
@@ -347,7 +347,7 @@ def preview():
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0',port=80,debug=True)
-    serve(app, host="0.0.0.0", port=80)
+    serve(app, host="0.0.0.0", port=80,threads=10)
 
 
 
