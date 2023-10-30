@@ -13,6 +13,10 @@ from mediapipe.python._framework_bindings import image
 from mediapipe.python._framework_bindings import image_frame
 from mediapipe.tasks.python import vision
 from mediapipe import tasks
+
+lock = threading.Lock()  # a lock on global scope, or self.lock = threading.Lock() in your class's __init_
+    
+
 np.seterr(divide='ignore', invalid='ignore')
 input_path = './overlay/public2.jpg'
 output_path="./overlay/human_image6.jpg"
@@ -99,9 +103,9 @@ def get_midpoint(p1,p2):
 
 
 def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
+    global lock
     global pose,detector,options,base_options
     xy_coordinate_positions={}
-    lock = threading.Lock()  # a lock on global scope, or self.lock = threading.Lock() in your class's __init_
     if (RUN_CV_SELFIE_SEGMENTER==True):
         with lock:
             imgOut = Selfie_segmentor.removeBG(img, imgBg=BG_COLOR, cutThreshold=0.48)
