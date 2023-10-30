@@ -6,6 +6,7 @@ import numpy as np
 import sys
 import pprint
 import math
+import threading
 from cvzone.PoseModule import PoseDetector
 import mediapipe as mp
 from mediapipe.python._framework_bindings import image
@@ -16,7 +17,6 @@ np.seterr(divide='ignore', invalid='ignore')
 input_path = './overlay/public2.jpg'
 output_path="./overlay/human_image6.jpg"
 model_path="./Models/selfie_multiclass_256x256.tflite"
-
 
 
 BaseOptions = mp.tasks.BaseOptions
@@ -101,8 +101,10 @@ def get_midpoint(p1,p2):
 def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
     global pose,detector,options,base_options
     xy_coordinate_positions={}
+    lock = threading.Lock()  # a lock on global scope, or self.lock = threading.Lock() in your class's __init_
     if (RUN_CV_SELFIE_SEGMENTER==True):
-        imgOut = Selfie_segmentor.removeBG(img, imgBg=BG_COLOR, cutThreshold=0.48)
+        with lock:
+            imgOut = Selfie_segmentor.removeBG(img, imgBg=BG_COLOR, cutThreshold=0.48)
     # cv2.imshow("Selfie Masked",imgOut)
     #we run it once more through mediapipe selife segmentor
     
@@ -119,8 +121,8 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
         imgOut = np.where(category_mask_condition, image_data, bg_image)
     # cv2.imshow("BG Masked",imgOut)
     
-    
-    pose=detector.findPose(imgOut,draw=False)
+    with lock:
+        pose=detector.findPose(imgOut,draw=False)
     
     lmList, bboxInfo = detector.findPosition(pose,draw=False, bboxWithHands=False)
     # pp.pprint("Results from lmList:")
