@@ -242,7 +242,7 @@ def overlayimage():
         
     # imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
     print(time.time(),file=sys.stderr, flush=True)
-    imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False,debug=False)
+    imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
     print(time.time(),file=sys.stderr, flush=True)
     # image_url = request.args.get('imageurl')
     # requested_url = urllib.urlopen(image_url)
