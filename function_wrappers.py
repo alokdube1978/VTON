@@ -211,8 +211,8 @@ def overlayimage():
         jewellery_image= data_uri_to_cv2_img(content["jewellery_image"])
         human_image=data_uri_to_cv2_img(content["human_image"])
         jewellery_position={
-            'thorax_top':[content['points']['thorax_top_x'],content['points']['thorax_top_y']],
-            'thorax_bottom':[content['points']['thorax_bottom_x'],content['points']['thorax_bottom_y']],
+            'thorax_top':[float(content['points']['thorax_top_x']),float(content['points']['thorax_top_y'])],
+            'thorax_bottom':[float(content['points']['thorax_bottom_x']),float(content['points']['thorax_bottom_y'])],
             }
         print("we have a human image",file=sys.stderr, flush=True) 
         
@@ -242,6 +242,10 @@ def overlayimage():
         
     # imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
     print(time.time(),file=sys.stderr, flush=True)
+    print ("Jewellery Image dimensions:",file=sys.stderr, flush=True)
+    print(jewellery_image.shape,file=sys.stderr, flush=True)
+    print ("Human Image dimensions:",file=sys.stderr, flush=True)
+    print(human_image.shape,file=sys.stderr, flush=True)
     imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
     print(time.time(),file=sys.stderr, flush=True)
     # image_url = request.args.get('imageurl')
@@ -301,8 +305,8 @@ def preview():
         print(content['points'],file=sys.stderr, flush=True)
         jewellery_image= data_uri_to_cv2_img(content["jewellery_image"])
         jewellery_position={
-            'thorax_top':[content['points']['thorax_top_x'],content['points']['thorax_top_y']],
-            'thorax_bottom':[content['points']['thorax_bottom_x'],content['points']['thorax_bottom_y']],
+            'thorax_top':[float(content['points']['thorax_top_x']),float(content['points']['thorax_top_y'])],
+            'thorax_bottom':[float(content['points']['thorax_bottom_x']),float(content['points']['thorax_bottom_y'])],
             }
     else:
         #necklace3.png
@@ -321,6 +325,10 @@ def preview():
         print("resizing human_image as one >600",file=sys.stderr, flush=True)
         
     print(time.time(),file=sys.stderr, flush=True)
+    print ("Jewellery Image dimensions:",file=sys.stderr, flush=True)
+    print(jewellery_image.shape,file=sys.stderr, flush=True)
+    print ("Human Image dimensions:",file=sys.stderr, flush=True)
+    print(human_image.shape,file=sys.stderr, flush=True)
     imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True)
     print(time.time(),file=sys.stderr, flush=True)
     # imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)

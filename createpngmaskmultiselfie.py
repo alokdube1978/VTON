@@ -259,9 +259,13 @@ def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=F
     jewellery_position["left_shoulder_pivot"]=[0,0]
     jewellery_position["thorax_midpoint"]=[0,0]
     
+    print ("jewellery position",file=sys.stderr, flush=True)
+    print(jewellery_position,file=sys.stderr, flush=True)
     
     jewellery_xy_position={}
     jewellery_xy_position=xy_coordinate_positions(jewellery_position)
+    print ("jewellery xy position",file=sys.stderr, flush=True)
+    print(jewellery_xy_position,file=sys.stderr, flush=True)
     jewellery_xy_position["thorax_midpoint"]=[round((jewellery_xy_position["thorax_top"][0]+jewellery_xy_position["thorax_bottom"][0])/2),round((jewellery_xy_position["thorax_top"][1]+jewellery_xy_position["thorax_bottom"][1])/2)]
     jewellery_position['thorax_top_bottom_distance']=math.dist(jewellery_xy_position['thorax_top'],jewellery_xy_position['thorax_bottom'])
     jewellery_xy_position['right_shoulder_pivot'][0]=round((jewellery_xy_position["thorax_midpoint"][0]-jewellery_position['thorax_top_bottom_distance']/2))
