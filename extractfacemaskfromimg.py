@@ -126,6 +126,8 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
             category_mask_condition=np.stack((category_mask.numpy_view(),) * 3, axis=-1) > 0.9
             imgOut = np.where(category_mask_condition,  bg_image,image_data)
         # cv2.imshow("BG Masked",imgOut)
+        
+    with lock:
         pose=detector.findPose(imgOut,draw=False)
     
         
