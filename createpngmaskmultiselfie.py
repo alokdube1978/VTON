@@ -243,8 +243,8 @@ def get_jewellery_image_mask(img):
     return (masked_image)
 
 
-def get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER=True):
-    human_image,face_position=extract_face.getSelfieImageandFaceLandMarkPoints(human_image,RUN_CV_SELFIE_SEGMENTER)
+def get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False):
+    human_image,face_position=extract_face.getSelfieImageandFaceLandMarkPoints(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale)
     human_image_tf = mp.Image(image_format=mp.ImageFormat.SRGB, data=human_image)
     with vision.ImageSegmenter.create_from_options(options) as segmenter:
         segmentation_result = segmenter.segment(human_image_tf)
@@ -382,35 +382,41 @@ def overlay_jewellery_on_face(jewellery_position,face_position,human_image,persp
     
     
     
-def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True):
+def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False):
     # human_image=cv2.imread(human_path,cv2.IMREAD_UNCHANGED)
     global interested_points
-    human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER)
+    human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale)
     human_image_copy=human_image.copy()
     perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug=True)
     
-    reduced_circle_radius=face_position["reduced_circle_radius"]
+    horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
+    vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
     for key in face_position:
          if isinstance(face_position[key], list):
           if key in interested_points:
             # print(key)
             cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
-    # print("get_sample_preview_image",file=sys.stderr, flush=True)
-    # print(time.time(),file=sys.stderr, flush=True)
-    cv2.circle(human_image,face_position["thorax_midpoint"],radius=reduced_circle_radius,color=(255,0,0),thickness=1)
-    cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),radius=3,color=(0,0,255),thickness=-1)
+    if use_different_horizontal_vertical_scale==True:
+            center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
+            axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
+            print ("Elliptical Markings",file=sys.stderr, flush=True)
+            cv2.ellipse(human_image,center,axes,math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
+    else:
+        cv2.circle(human_image,face_position["thorax_midpoint"],radius=horizontal_reduced_circle_radius,color=(255,0,0),thickness=1)
+    
+    cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
 
     imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
     return imgOverlay
     
 
-def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False):
+def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=False):
     global interested_points
     human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER)
     human_image_copy=human_image.copy()
     perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug)
-    reduced_circle_radius=face_position["reduced_circle_radius"]
-    
+    horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
+    vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
     if (debug==True):
         for key in face_position:
              if isinstance(face_position[key], list):
@@ -418,7 +424,14 @@ def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFI
                 # print(key)
                 cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
 
-        cv2.circle(human_image,face_position["thorax_midpoint"],radius=reduced_circle_radius,color=(255,0,0),thickness=1)
+        if use_different_horizontal_vertical_scale==True:
+            center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
+            axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
+            print ("Elliptical Markings",file=sys.stderr, flush=True)
+            cv2.ellipse(human_image,center,axes,math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
+        else:
+            cv2.circle(human_image,face_position["thorax_midpoint"],radius=horizontal_reduced_circle_radius,color=(255,0,0),thickness=1)
+        
         cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
 
         
@@ -545,14 +558,15 @@ def main():
     
     perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(img,jewellery_position,face_position,debug=True)
     cv2.imshow("Perspective",perspective_masked_image)
-    reduced_circle_radius=face_position["reduced_circle_radius"]
+    horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
+    vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
     for key in face_position:
          if isinstance(face_position[key], list):
             # print(key)
             cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
 
-    cv2.circle(human_image,face_position["thorax_midpoint"],radius=reduced_circle_radius,color=(255,0,0),thickness=1)
-   
+    cv2.circle(human_image,face_position["thorax_midpoint"],radius=horizontal_reduced_circle_radius,color=(255,0,0),thickness=1)
+    cv2.circle(human_image,face_position["thorax_midpoint"],radius=vertical_reduced_circle_radius,color=(0,0,255),thickness=1)
 
     cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
 

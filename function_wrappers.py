@@ -183,8 +183,8 @@ def data_uri_to_cv2_img(uri):
 
 
 
-def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=True):
-    imgOut=overlay.get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER,debug)
+def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=True,use_different_horizontal_vertical_scale=False):
+    imgOut=overlay.get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER,debug,use_different_horizontal_vertical_scale)
     return imgOut
 
 
@@ -246,7 +246,7 @@ def overlayimage():
     print(jewellery_image.shape,file=sys.stderr, flush=True)
     print ("Human Image dimensions:",file=sys.stderr, flush=True)
     print(human_image.shape,file=sys.stderr, flush=True)
-    imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
+    imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=True)
     print(time.time(),file=sys.stderr, flush=True)
     # image_url = request.args.get('imageurl')
     # requested_url = urllib.urlopen(image_url)
@@ -329,7 +329,7 @@ def preview():
     print(jewellery_image.shape,file=sys.stderr, flush=True)
     print ("Human Image dimensions:",file=sys.stderr, flush=True)
     print(human_image.shape,file=sys.stderr, flush=True)
-    imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True)
+    imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=True)
     print(time.time(),file=sys.stderr, flush=True)
     # imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
     # image_url = request.args.get('imageurl')

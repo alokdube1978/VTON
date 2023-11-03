@@ -102,7 +102,7 @@ def get_midpoint(p1,p2):
                         
 
 
-def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
+def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False):
     global lock
     global pose,detector,options,base_options
     xy_coordinate_positions={}
@@ -157,13 +157,30 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
     xy_coordinate_positions["thorax_midpoint"]=thorax_midpoint
 
     face_nose_thorax_distance=math.dist(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
+    shoulder_points_distance=math.dist(xy_coordinate_positions["left_shoulder"],xy_coordinate_positions["right_shoulder"])
+    xy_coordinate_positions["shoulder_points_distance"]=shoulder_points_distance
     
     xy_coordinate_positions["face_nose_thorax_distance"]=face_nose_thorax_distance
+    
+    if use_different_horizontal_vertical_scale==True:
+        
+        xy_coordinate_positions["horizontal_reduced_circle_radius"]=round(xy_coordinate_positions["shoulder_points_distance"]/2* 50/100)
+        xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
+    else:
+        xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
+        xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
+    
+    vertical_reduced_circle_radius=xy_coordinate_positions["vertical_reduced_circle_radius"]
+    horizontal_reduced_circle_radius=xy_coordinate_positions["horizontal_reduced_circle_radius"]
+    
     xy_coordinate_positions["reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
     reduced_circle_radius=xy_coordinate_positions["reduced_circle_radius"]
-    xy_coordinate_positions["thorax_top_bottom_distance"]=xy_coordinate_positions["reduced_circle_radius"]*2
+    xy_coordinate_positions["thorax_top_bottom_distance"]=xy_coordinate_positions["horizontal_reduced_circle_radius"]*2
     nose_slope,nose_intercept=slope_intercept(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
     shoulder_slope,shoulder_intercept=slope_intercept(xy_coordinate_positions["left_shoulder"],xy_coordinate_positions["right_shoulder"])
+    xy_coordinate_positions["nose_slope"]=nose_slope
+    xy_coordinate_positions["shoulder_slope"]=shoulder_slope
+    
     # print("----shoulder slope,intercept----",file=sys.stderr, flush=True)
     # print (shoulder_slope,shoulder_intercept,file=sys.stderr, flush=True)
     
@@ -185,27 +202,27 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True):
 
 
     if (shoulder_slope<=0):
-        xy_coordinate_positions["right_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.pi+math.atan(shoulder_slope)))
-        xy_coordinate_positions["right_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.pi+math.atan(shoulder_slope)))
+        xy_coordinate_positions["right_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+horizontal_reduced_circle_radius*math.cos(math.pi+math.atan(shoulder_slope)))
+        xy_coordinate_positions["right_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+horizontal_reduced_circle_radius*math.sin(math.pi+math.atan(shoulder_slope)))
     else:
-        xy_coordinate_positions["right_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.pi+math.atan(shoulder_slope)))
-        xy_coordinate_positions["right_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.pi+math.atan(shoulder_slope)))   
+        xy_coordinate_positions["right_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+horizontal_reduced_circle_radius*math.cos(math.pi+math.atan(shoulder_slope)))
+        xy_coordinate_positions["right_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+horizontal_reduced_circle_radius*math.sin(math.pi+math.atan(shoulder_slope)))   
 
 
 
     if (shoulder_slope<=0):
-        xy_coordinate_positions["left_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.atan(shoulder_slope)))
-        xy_coordinate_positions["left_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.atan(shoulder_slope)))
+        xy_coordinate_positions["left_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+horizontal_reduced_circle_radius*math.cos(math.atan(shoulder_slope)))
+        xy_coordinate_positions["left_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+horizontal_reduced_circle_radius*math.sin(math.atan(shoulder_slope)))
     else:
-        xy_coordinate_positions["left_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.atan(shoulder_slope)))
-        xy_coordinate_positions["left_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.atan(shoulder_slope)))
+        xy_coordinate_positions["left_shoulder_pivot"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+horizontal_reduced_circle_radius*math.cos(math.atan(shoulder_slope)))
+        xy_coordinate_positions["left_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+horizontal_reduced_circle_radius*math.sin(math.atan(shoulder_slope)))
 
 
-    xy_coordinate_positions["thorax_top"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(math.pi/2+math.atan(shoulder_slope)))
-    xy_coordinate_positions["thorax_top"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(math.pi/2+math.atan(shoulder_slope)))
+    xy_coordinate_positions["thorax_top"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+vertical_reduced_circle_radius*math.cos(math.pi/2+math.atan(shoulder_slope)))
+    xy_coordinate_positions["thorax_top"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+vertical_reduced_circle_radius*math.sin(math.pi/2+math.atan(shoulder_slope)))
     
-    xy_coordinate_positions["thorax_bottom"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+reduced_circle_radius*math.cos(-1*math.pi/2+math.atan(shoulder_slope)))
-    xy_coordinate_positions["thorax_bottom"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+reduced_circle_radius*math.sin(-1*math.pi/2+math.atan(shoulder_slope)))
+    xy_coordinate_positions["thorax_bottom"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+vertical_reduced_circle_radius*math.cos(-1*math.pi/2+math.atan(shoulder_slope)))
+    xy_coordinate_positions["thorax_bottom"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+vertical_reduced_circle_radius*math.sin(-1*math.pi/2+math.atan(shoulder_slope)))
     
 
     # print("reduced circle")
