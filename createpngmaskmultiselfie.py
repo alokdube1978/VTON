@@ -19,7 +19,7 @@ from cvzone.ClassificationModule import Classifier
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 model_path="D:\\VTON\\Models\\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\VTON\\overlay\\human_image.jpg'
+human_path = 'D:\\VTON\\overlay\\human_image22.jpg'
 input_path = "D:\\VTON\\overlay\\necklace10.png"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
@@ -439,6 +439,8 @@ def get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SE
         # cv2.circle(human_image,face_position["thorax_midpoint"],radius=vertical_reduced_circle_radius,color=(0,0,255),thickness=1)
         center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
         axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
+        print ("Elliptical Markings")
+        # print(math.degrees(face_position["shoulder_slope"]))
         cv2.ellipse(human_image,center,axes,math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
     else:
         cv2.circle(human_image,face_position["thorax_midpoint"],radius=horizontal_reduced_circle_radius,color=(255,0,0),thickness=1)
@@ -467,7 +469,7 @@ def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFI
         if use_different_horizontal_vertical_scale==True:
             center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
             axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
-            cv2.ellipse(human_image,center,axes,math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
+            cv2.ellipse(human_image,center,axes,-1*math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
         else:
             cv2.circle(human_image,face_position["thorax_midpoint"],radius=horizontal_reduced_circle_radius,color=(255,0,0),thickness=1)
         
@@ -493,7 +495,7 @@ def main():
     #initialization of mediapipe selfie_multiclass
     # cv2.imshow("selfie",human_image)
     
-    human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale=False)
+    human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale=True)
     cv2.namedWindow("Masked Image")
     cv2.moveWindow("Masked Image", 10,10)
     human_image_copy=human_image.copy()
@@ -629,7 +631,9 @@ def main():
 
     center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
     axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
-    cv2.ellipse(human_image,center,axes,math.degrees(face_position["shoulder_slope"]),0,360,(255,0,0),1)
+    print ("Elliptical Markings")
+    
+    cv2.ellipse(human_image,center,axes,-1*math.degrees(face_position["shoulder_slope"]),0,360,(255,0,0),1)
     
    
 
