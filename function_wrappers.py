@@ -77,8 +77,8 @@ def resizeAndPad(img, size, padColor=255):
 
     # #necklace3.jpg
     # jewellery_position={
-    # 'thorax_top':[210,307],
-    # 'thorax_bottom':[210,481],
+    # 'thorax_top':[210,287],
+    # 'thorax_bottom':[210,501],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
@@ -309,12 +309,12 @@ def preview():
             'thorax_bottom':[float(content['points']['thorax_bottom_x']),float(content['points']['thorax_bottom_y'])],
             }
     else:
-        #necklace3.png
+        #necklace11.png
         jewellery_position={
-                'thorax_top':[210,307],
-                'thorax_bottom':[210,481],
+                'thorax_top':[175,187],
+                'thorax_bottom':[175,364],
             }
-        jewellery_image=cv2.imread("./overlay/necklace3.jpg",cv2.IMREAD_UNCHANGED)
+        jewellery_image=cv2.imread("./overlay/necklace11.png",cv2.IMREAD_UNCHANGED)
     
     human_image=cv2.imread('./overlay/public3.jpg',cv2.IMREAD_UNCHANGED)
     if (human_image.shape[0]>400 and human_image.shape[1]>400):

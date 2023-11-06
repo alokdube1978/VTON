@@ -164,11 +164,16 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     
     if use_different_horizontal_vertical_scale==True:
         
-        xy_coordinate_positions["horizontal_reduced_circle_radius"]=round(xy_coordinate_positions["shoulder_points_distance"]/2* 50/100)
+        xy_coordinate_positions["horizontal_reduced_circle_radius"]=round(xy_coordinate_positions["shoulder_points_distance"]/2* 40/100)
         xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
     else:
         xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
         xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
+    
+    # if (xy_coordinate_positions["horizontal_reduced_circle_radius"]>xy_coordinate_positions["vertical_reduced_circle_radius"]):
+        # print("Retaining same scale")
+        # xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
+        # xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
     
     vertical_reduced_circle_radius=xy_coordinate_positions["vertical_reduced_circle_radius"]
     horizontal_reduced_circle_radius=xy_coordinate_positions["horizontal_reduced_circle_radius"]
@@ -180,6 +185,24 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     shoulder_slope,shoulder_intercept=slope_intercept(xy_coordinate_positions["left_shoulder"],xy_coordinate_positions["right_shoulder"])
     xy_coordinate_positions["nose_slope"]=nose_slope
     xy_coordinate_positions["shoulder_slope"]=shoulder_slope
+    
+    #we align with nose thorax slope if it is off upto 10 degrees rather than shoulder slope 
+    # if shoulder slope >5
+    print ("Original Nose Slope",file=sys.stderr, flush=True)
+    print(math.degrees(math.atan(xy_coordinate_positions["nose_slope"])),file=sys.stderr, flush=True)
+    print ("Original Shoulder Slope",file=sys.stderr, flush=True)
+    print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
+    
+        
+    if ((abs(math.degrees(math.atan(nose_slope)))>=80 and abs(math.degrees(math.atan(nose_slope))) <=100 ) and (abs(math.degrees(math.atan(shoulder_slope)))>5)) :
+       print ("Resetting shoulder slope as nose slope is vertical",file=sys.stderr, flush=True)
+       shoulder_slope=abs(math.atan(nose_slope))-math.pi/2
+       xy_coordinate_positions["shoulder_slope"]=shoulder_slope
+       print("Reset Shoulder slope",file=sys.stderr, flush=True)
+       print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
+       
+ 
+    
     
     # print("----shoulder slope,intercept----",file=sys.stderr, flush=True)
     # print (shoulder_slope,shoulder_intercept,file=sys.stderr, flush=True)
@@ -218,6 +241,8 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         xy_coordinate_positions["left_shoulder_pivot"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+horizontal_reduced_circle_radius*math.sin(math.atan(shoulder_slope)))
 
 
+
+
     xy_coordinate_positions["thorax_top"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+vertical_reduced_circle_radius*math.cos(math.pi/2+math.atan(shoulder_slope)))
     xy_coordinate_positions["thorax_top"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+vertical_reduced_circle_radius*math.sin(math.pi/2+math.atan(shoulder_slope)))
     
@@ -228,8 +253,10 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     # print("reduced circle")
     # print(xy_coordinate_positions["reduced_circle_radius"])
     positions=img_position_from_xy_coordinate_positions(xy_coordinate_positions)
-    # print ("Image postions",file=sys.stderr, flush=True)
-    # print(positions,file=sys.stderr, flush=True)
+    print ("XY coordinate positions",file=sys.stderr, flush=True)
+    print (xy_coordinate_positions,file=sys.stderr, flush=True)
+    print ("Image postions",file=sys.stderr, flush=True)
+    print(positions,file=sys.stderr, flush=True)
     return imgOut,positions
 
 

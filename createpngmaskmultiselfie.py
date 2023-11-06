@@ -26,8 +26,7 @@ BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
 model="isnet-general-use"
 session=new_session(model)
-interested_points=["thorax_top","thorax_bottom","thorax_midpoint","right_shoulder_pivot","left_shoulder_pivot"]
-
+interested_points=["thorax_top","thorax_bottom","thorax_midpoint","right_shoulder_pivot","left_shoulder_pivot","left_shoulder","right_shoulder"]
 #mediapipe initialization
 BaseOptions = mp.tasks.BaseOptions
 ImageSegmenter = mp.tasks.vision.ImageSegmenter
@@ -259,13 +258,11 @@ def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=F
     jewellery_position["left_shoulder_pivot"]=[0,0]
     jewellery_position["thorax_midpoint"]=[0,0]
     
-    print ("jewellery position",file=sys.stderr, flush=True)
-    print(jewellery_position,file=sys.stderr, flush=True)
+    
     
     jewellery_xy_position={}
     jewellery_xy_position=xy_coordinate_positions(jewellery_position)
-    print ("jewellery xy position",file=sys.stderr, flush=True)
-    print(jewellery_xy_position,file=sys.stderr, flush=True)
+   
     jewellery_xy_position["thorax_midpoint"]=[round((jewellery_xy_position["thorax_top"][0]+jewellery_xy_position["thorax_bottom"][0])/2),round((jewellery_xy_position["thorax_top"][1]+jewellery_xy_position["thorax_bottom"][1])/2)]
     jewellery_position['thorax_top_bottom_distance']=math.dist(jewellery_xy_position['thorax_top'],jewellery_xy_position['thorax_bottom'])
     jewellery_xy_position['right_shoulder_pivot'][0]=round((jewellery_xy_position["thorax_midpoint"][0]-jewellery_position['thorax_top_bottom_distance']/2))
@@ -360,6 +357,12 @@ def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=F
     yadd=round(abs(yadd))
     perspective_masked_image=cv2.warpPerspective(masked_image,M,(masked_image.shape[1]+xadd, masked_image.shape[0]+yadd),flags=cv2.INTER_LINEAR)
     
+    print ("jewellery position",file=sys.stderr, flush=True)
+    print(jewellery_position,file=sys.stderr, flush=True)
+    
+    print ("jewellery xy position",file=sys.stderr, flush=True)
+    print(jewellery_xy_position,file=sys.stderr, flush=True)
+    
     return (perspective_masked_image,masked_image,jewellery_position,face_position)
 
 
@@ -399,8 +402,9 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
     if use_different_horizontal_vertical_scale==True:
             center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
             axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
-            print ("Elliptical Markings",file=sys.stderr, flush=True)
-            cv2.ellipse(human_image,center,axes,math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
+            print ("Elliptical Markings Angle",file=sys.stderr, flush=True)
+            print(-1*math.degrees(face_position["shoulder_slope"]),file=sys.stderr, flush=True)
+            cv2.ellipse(human_image,center,axes,-1*math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
     else:
         cv2.circle(human_image,face_position["thorax_midpoint"],radius=horizontal_reduced_circle_radius,color=(255,0,0),thickness=1)
     
@@ -427,8 +431,9 @@ def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFI
         if use_different_horizontal_vertical_scale==True:
             center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
             axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
-            print ("Elliptical Markings",file=sys.stderr, flush=True)
-            cv2.ellipse(human_image,center,axes,math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
+            print ("Elliptical Markings Angle",file=sys.stderr, flush=True)
+            print(-1*math.degrees(face_position["shoulder_slope"]),file=sys.stderr, flush=True)
+            cv2.ellipse(human_image,center,axes,-1*math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
         else:
             cv2.circle(human_image,face_position["thorax_midpoint"],radius=horizontal_reduced_circle_radius,color=(255,0,0),thickness=1)
         
