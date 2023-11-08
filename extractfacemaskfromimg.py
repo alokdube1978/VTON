@@ -135,6 +135,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     lmList, bboxInfo = detector.findPosition(pose,draw=False, bboxWithHands=False)
     # pp.pprint("Results from lmList:")
     # pp.pprint(lmList)
+    
     positions = {
     "left_eye" : lmList[3][:2],
     "right_eye": lmList[6][:2],
@@ -142,6 +143,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     "left_shoulder" : lmList[11][:2],
     "right_shoulder" : lmList[12][:2]
     }
+    
     # print("Positions",file=sys.stderr, flush=True)
     # print(positions,file=sys.stderr, flush=True)
     xy_coordinate_positions=get_xy_coordinate_positions(positions)
@@ -170,7 +172,9 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
         xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
     
-    if (xy_coordinate_positions["vertical_reduced_circle_radius"]>xy_coordinate_positions["horizontal_reduced_circle_radius"]):
+    
+    # if we are too wide on the vertical scale - we tie it to horizontal scale
+    if ((xy_coordinate_positions["vertical_reduced_circle_radius"]/xy_coordinate_positions["horizontal_reduced_circle_radius"]))>1.2:
         xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
         xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
     

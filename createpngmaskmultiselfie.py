@@ -19,7 +19,7 @@ from cvzone.ClassificationModule import Classifier
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 model_path="D:\\VTON\\Models\\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\VTON\\overlay\\human_image22.jpg'
+human_path = 'D:\\VTON\\overlay\\human_image20.jpg'
 input_path = "D:\\VTON\\overlay\\necklace10.png"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
@@ -286,12 +286,16 @@ def get_jewellery_image_mask(img):
 
 
 def get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False):
-    human_image,face_position=extract_face.getSelfieImageandFaceLandMarkPoints(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale)
-    human_image_tf = mp.Image(image_format=mp.ImageFormat.SRGB, data=human_image)
-    with vision.ImageSegmenter.create_from_options(options) as segmenter:
-        segmentation_result = segmenter.segment(human_image_tf)
-    human_image=human_image_tf.numpy_view().copy()
-    return (human_image,face_position,segmentation_result)
+    try:
+    
+        human_image,face_position=extract_face.getSelfieImageandFaceLandMarkPoints(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale)
+        human_image_tf = mp.Image(image_format=mp.ImageFormat.SRGB, data=human_image)
+        with vision.ImageSegmenter.create_from_options(options) as segmenter:
+            segmentation_result = segmenter.segment(human_image_tf)
+        human_image=human_image_tf.numpy_view().copy()
+        return (human_image,face_position,segmentation_result)
+    except:
+        raise Exception("Unable to extract Facial Landmark points")
     
     
 def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=False):
@@ -420,65 +424,79 @@ def overlay_jewellery_on_face(jewellery_position,face_position,human_image,persp
     
     
     
-def get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False):
+def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False):
+    # human_image=cv2.imread(human_path,cv2.IMREAD_UNCHANGED)
     global interested_points
-    human_image=cv2.imread(human_path,cv2.IMREAD_UNCHANGED)
-    human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale)
-    human_image_copy=human_image.copy()
-    perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug=True)
-    
-    horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
-    vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
-    for key in face_position:
-         if isinstance(face_position[key], list):
-          if key in interested_points:
-            # print(key)
-            cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
-    if use_different_horizontal_vertical_scale==True:
-        # cv2.circle(human_image,face_position["thorax_midpoint"],radius=horizontal_reduced_circle_radius,color=(255,0,0),thickness=1)
-        # cv2.circle(human_image,face_position["thorax_midpoint"],radius=vertical_reduced_circle_radius,color=(0,0,255),thickness=1)
-        center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
-        axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
-        print ("Elliptical Markings")
-        # print(math.degrees(face_position["shoulder_slope"]))
-        cv2.ellipse(human_image,center,axes,math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
-    else:
-        cv2.circle(human_image,face_position["thorax_midpoint"],radius=horizontal_reduced_circle_radius,color=(255,0,0),thickness=1)
-    
-    cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
-
-    imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
-    return imgOverlay
-    
-
-def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=False):
-    
-    human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale)
-    human_image_copy=human_image.copy()
-    perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug)
-    horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
-    vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
-    if debug==True:
+    try:
+        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale)
+        human_image_copy=human_image.copy()
+    except:
+        raise Exception("Unable to extract Facial Landmark points")
+        
+    try:    
+        perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug=True)
+        horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
+        vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
         for key in face_position:
              if isinstance(face_position[key], list):
               if key in interested_points:
                 # print(key)
                 cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
-        
-        
         if use_different_horizontal_vertical_scale==True:
-            center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
-            axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
-            cv2.ellipse(human_image,center,axes,-1*math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
+                center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
+                axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
+                print ("Elliptical Markings Angle",file=sys.stderr, flush=True)
+                print(-1*math.degrees(face_position["shoulder_slope"]),file=sys.stderr, flush=True)
+                cv2.ellipse(human_image,center,axes,-1*math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
         else:
             cv2.circle(human_image,face_position["thorax_midpoint"],radius=horizontal_reduced_circle_radius,color=(255,0,0),thickness=1)
         
         cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
 
-        
-    imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
-    return imgOverlay  
+        imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
+        return imgOverlay
     
+    except:
+        raise Exception("Unable to determine Jewellery points")
+    
+    
+
+def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=False):
+    global interested_points
+    try:
+        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER)
+        human_image_copy=human_image.copy()
+    except:
+        raise Exception("Unable to extract Facial Landmark points from human image")
+    
+    try:
+        perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug)
+        horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
+        vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
+        if (debug==True):
+            for key in face_position:
+                 if isinstance(face_position[key], list):
+                  if key in interested_points:
+                    # print(key)
+                    cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
+
+            if use_different_horizontal_vertical_scale==True:
+                center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
+                axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
+                print ("Elliptical Markings Angle",file=sys.stderr, flush=True)
+                print(-1*math.degrees(face_position["shoulder_slope"]),file=sys.stderr, flush=True)
+                cv2.ellipse(human_image,center,axes,-1*math.degrees(face_position["shoulder_slope"]),0,360,(0,0,255),1)
+            else:
+                cv2.circle(human_image,face_position["thorax_midpoint"],radius=horizontal_reduced_circle_radius,color=(255,0,0),thickness=1)
+            
+            cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
+
+            
+        imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
+        return imgOverlay
+    except:
+        raise Exception("Unable to determine Jewellery points")
+     
 def main():
     global interested_points
     img = cv2.imread(input_path,cv2.IMREAD_UNCHANGED)
@@ -494,8 +512,16 @@ def main():
     RUN_CV_SELFIE_SEGMENTER=True
     #initialization of mediapipe selfie_multiclass
     # cv2.imshow("selfie",human_image)
+    status="success"
+    message=""
+    try:
+        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale=True)
+    except Exception as e:
+        status="error"
+        message=e
     
-    human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale=True)
+    print(status)
+    print(message)
     cv2.namedWindow("Masked Image")
     cv2.moveWindow("Masked Image", 10,10)
     human_image_copy=human_image.copy()
