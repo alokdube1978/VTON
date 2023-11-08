@@ -199,22 +199,29 @@ def index():
 @app.route('/overlayimage', methods=['GET','POST','OPTIONS'])
 @cross_origin()
 def overlayimage():
+    status="success"
     if (request.method=="OPTIONS"):
         return
         
     if (request.method=="POST"):
-        content = request.json
-        # print("JSON input",file=sys.stderr, flush=True)
-        # print(content,file=sys.stderr, flush=True)
-        print("Points",file=sys.stderr, flush=True)
-        print(content['points'],file=sys.stderr, flush=True)
-        jewellery_image= data_uri_to_cv2_img(content["jewellery_image"])
-        human_image=data_uri_to_cv2_img(content["human_image"])
-        jewellery_position={
-            'thorax_top':[float(content['points']['thorax_top_x']),float(content['points']['thorax_top_y'])],
-            'thorax_bottom':[float(content['points']['thorax_bottom_x']),float(content['points']['thorax_bottom_y'])],
-            }
-        print("we have a human image",file=sys.stderr, flush=True) 
+        try:
+            content = request.json
+            # print("JSON input",file=sys.stderr, flush=True)
+            # print(content,file=sys.stderr, flush=True)
+            print("Points",file=sys.stderr, flush=True)
+            print(content['points'],file=sys.stderr, flush=True)
+            jewellery_image= data_uri_to_cv2_img(content["jewellery_image"])
+            human_image=data_uri_to_cv2_img(content["human_image"])
+            jewellery_position={
+                'thorax_top':[float(content['points']['thorax_top_x']),float(content['points']['thorax_top_y'])],
+                'thorax_bottom':[float(content['points']['thorax_bottom_x']),float(content['points']['thorax_bottom_y'])],
+                }
+            print("we have a human image",file=sys.stderr, flush=True) 
+            
+        except:
+            message="Unable to extract data from input"
+            status="error"
+            image=""
         
         
     else:       
@@ -224,43 +231,75 @@ def overlayimage():
         jewellery_position={
             'thorax_top':[162,180],
             'thorax_bottom':[162,357],
-    }
-            
+        }
         jewellery_image=cv2.imread("./overlay/necklace11.png",cv2.IMREAD_UNCHANGED)
-        human_image=cv2.imread("./overlay/human_image19.png",cv2.IMREAD_UNCHANGED)
+        human_image=cv2.imread("./overlay/human_image18.png",cv2.IMREAD_UNCHANGED)
+    if (status=="success"):    
+        if (human_image.shape[2]==4):
+            print("Converting PNG to BGR")
+            human_image=cv2.cvtColor(human_image, cv2.COLOR_BGRA2BGR)
+            
+        if (human_image.shape[0]>400 and human_image.shape[1]>400):
+            human_image=resizeAndPad(human_image,(400,400))
+            print("resizing human_image as both >400",file=sys.stderr, flush=True)
+        elif (human_image.shape[0]>800 or human_image.shape[1]>800):
+            human_image=resizeAndPad(human_image,(500,500))
+            print("resizing human_image as one width or heigh>800",file=sys.stderr, flush=True)
+            
+        # imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
+        print(time.time(),file=sys.stderr, flush=True)
+        print ("Jewellery Image dimensions:",file=sys.stderr, flush=True)
+        print(jewellery_image.shape,file=sys.stderr, flush=True)
+        print ("Human Image dimensions:",file=sys.stderr, flush=True)
+        print(human_image.shape,file=sys.stderr, flush=True)
         
-    if (human_image.shape[2]==4):
-        print("Converting PNG to BGR")
-        human_image=cv2.cvtColor(human_image, cv2.COLOR_BGRA2BGR)
         
-    if (human_image.shape[0]>400 and human_image.shape[1]>400):
-        human_image=resizeAndPad(human_image,(400,400))
-        print("resizing human_image as both >400",file=sys.stderr, flush=True)
-    elif (human_image.shape[0]>800 or human_image.shape[1]>800):
-        human_image=resizeAndPad(human_image,(500,500))
-        print("resizing human_image as one width or heigh>800",file=sys.stderr, flush=True)
+        if ((int(jewellery_position["thorax_top"][0])>0 and int(jewellery_position["thorax_top"][0])<jewellery_image.shape[1])
+            and 
+            (int(jewellery_position["thorax_top"][1])>0 and int(jewellery_position["thorax_top"][1])<jewellery_image.shape[0])
+            and 
+            (int(jewellery_position["thorax_bottom"][0])>0 and int(jewellery_position["thorax_bottom"][0])<jewellery_image.shape[1])
+            and 
+            (int(jewellery_position["thorax_bottom"][1])>0 and int(jewellery_position["thorax_bottom"][1])<jewellery_image.shape[0])):
         
-    # imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
-    print(time.time(),file=sys.stderr, flush=True)
-    print ("Jewellery Image dimensions:",file=sys.stderr, flush=True)
-    print(jewellery_image.shape,file=sys.stderr, flush=True)
-    print ("Human Image dimensions:",file=sys.stderr, flush=True)
-    print(human_image.shape,file=sys.stderr, flush=True)
-    imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=True)
+            status="success"
+            message=""
+        else:
+            status="error"
+            message="Invalid Coordinates for Jewellery"
+            image=human_image
+            
+    
+    
+    if (status=="success"):
+        try:
+            imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=True)
+        except Exception as e:
+            status="error"
+            message=str(e)
+            image=human_image
+        
     print(time.time(),file=sys.stderr, flush=True)
     # image_url = request.args.get('imageurl')
     # requested_url = urllib.urlopen(image_url)
     # image_array = np.asarray(bytearray(requested_url.read()), dtype=np.uint8)
     # img = cv2.imdecode(image_array, -1)
     # Do some processing, get output_img
-
-    retval, buffer = cv2.imencode('.png', imgOut)
+    
+    if (status=="success"):
+        retval, buffer = cv2.imencode('.png', imgOut)
     if (request.method=="POST"):
-        buffer_b64encoded = base64.b64encode(buffer)
         data = { 
-                "status" : "success", 
-                "image" : buffer_b64encoded.decode('utf-8'), 
+                "status" : status, 
+                "message" : message,
             }
+            
+        if (status=="success"):
+            buffer_b64encoded = base64.b64encode(buffer)
+            data["image"]=buffer_b64encoded.decode('utf-8')
+        if (status=="error"):
+            print ("Error:",file=sys.stderr, flush=True)
+            print (data)
         return jsonify(data)
     else:
         response=make_response(buffer.tobytes())
@@ -293,21 +332,28 @@ def preview():
     # print(request.method,file=sys.stderr, flush=True)
     # print("RemoteAddr",file=sys.stderr, flush=True)
     # print(request.remote_addr,file=sys.stderr, flush=True)
-    
+    status="success"
     if (request.method=="OPTIONS"):
         return
     
     if (request.method=="POST"):
-        content = request.json
+       
         # print("JSON input",file=sys.stderr, flush=True)
         # print(content,file=sys.stderr, flush=True)
-        print("Points",file=sys.stderr, flush=True)
-        print(content['points'],file=sys.stderr, flush=True)
-        jewellery_image= data_uri_to_cv2_img(content["jewellery_image"])
-        jewellery_position={
-            'thorax_top':[float(content['points']['thorax_top_x']),float(content['points']['thorax_top_y'])],
-            'thorax_bottom':[float(content['points']['thorax_bottom_x']),float(content['points']['thorax_bottom_y'])],
-            }
+        try:
+            content = request.json
+            print("Points",file=sys.stderr, flush=True)
+            print(content['points'],file=sys.stderr, flush=True)
+            jewellery_image= data_uri_to_cv2_img(content["jewellery_image"])
+            jewellery_position={
+                'thorax_top':[float(content['points']['thorax_top_x']),float(content['points']['thorax_top_y'])],
+                'thorax_bottom':[float(content['points']['thorax_bottom_x']),float(content['points']['thorax_bottom_y'])],
+                }
+        except:
+            message="Unable to extract data from input"
+            status="error"
+            image=""
+            
     else:
         #necklace11.png
         jewellery_position={
@@ -316,20 +362,47 @@ def preview():
             }
         jewellery_image=cv2.imread("./overlay/necklace11.png",cv2.IMREAD_UNCHANGED)
     
-    human_image=cv2.imread('./overlay/public3.jpg',cv2.IMREAD_UNCHANGED)
-    if (human_image.shape[0]>400 and human_image.shape[1]>400):
-        human_image=resizeAndPad(human_image,(400,400))
-        print("resizing human_image as both >400",file=sys.stderr, flush=True)
-    elif (human_image.shape[0]>600 or human_image.shape[1]>600):
-        human_image=resizeAndPad(human_image,(500,500))
-        print("resizing human_image as one >600",file=sys.stderr, flush=True)
+    
+    if (status=="success"):
+    
+        human_image=cv2.imread('./overlay/human_image8.jpg',cv2.IMREAD_UNCHANGED)
+        if (human_image.shape[0]>400 and human_image.shape[1]>400):
+            human_image=resizeAndPad(human_image,(400,400))
+            print("resizing human_image as both >400",file=sys.stderr, flush=True)
+        elif (human_image.shape[0]>600 or human_image.shape[1]>600):
+            human_image=resizeAndPad(human_image,(500,500))
+            print("resizing human_image as one >600",file=sys.stderr, flush=True)
+            
+        print(time.time(),file=sys.stderr, flush=True)
+        print ("Jewellery Image dimensions:",file=sys.stderr, flush=True)
+        print(jewellery_image.shape,file=sys.stderr, flush=True)
+        print ("Human Image dimensions:",file=sys.stderr, flush=True)
+        print(human_image.shape,file=sys.stderr, flush=True)
         
-    print(time.time(),file=sys.stderr, flush=True)
-    print ("Jewellery Image dimensions:",file=sys.stderr, flush=True)
-    print(jewellery_image.shape,file=sys.stderr, flush=True)
-    print ("Human Image dimensions:",file=sys.stderr, flush=True)
-    print(human_image.shape,file=sys.stderr, flush=True)
-    imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=True)
+        if ((int(jewellery_position["thorax_top"][0])>0 and int(jewellery_position["thorax_top"][0])<jewellery_image.shape[1])
+            and 
+            (int(jewellery_position["thorax_top"][1])>0 and int(jewellery_position["thorax_top"][1])<jewellery_image.shape[0])
+            and 
+            (int(jewellery_position["thorax_bottom"][0])>0 and int(jewellery_position["thorax_bottom"][0])<jewellery_image.shape[1])
+            and 
+            (int(jewellery_position["thorax_bottom"][1])>0 and int(jewellery_position["thorax_bottom"][1])<jewellery_image.shape[0])):
+            
+            status="success"
+            message=""
+        else:
+            status="error"
+            message="Invalid Coordinates for Jewellery"
+            image=jewellery_image
+        
+    
+    if (status=="success"):
+        try:
+            imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=True)
+        except Exception as e:
+            status="error"
+            message=str(e)
+            image=jewellery_image
+            
     print(time.time(),file=sys.stderr, flush=True)
     # imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False)
     # image_url = request.args.get('imageurl')
@@ -337,16 +410,23 @@ def preview():
     # image_array = np.asarray(bytearray(requested_url.read()), dtype=np.uint8)
     # img = cv2.imdecode(image_array, -1)
     # Do some processing, get output_img
-
-    retval, buffer = cv2.imencode('.png', imgOut)
+    if (status=="success"):
+        retval, buffer = cv2.imencode('.png', imgOut)
     if (request.method=="POST"):
-        buffer_b64encoded = base64.b64encode(buffer)
         data = { 
-                "status" : "success", 
-                "image" : buffer_b64encoded.decode('utf-8'), 
+                "status" : status, 
+                "message" : message,
             }
+            
+        if (status=="success"):
+            buffer_b64encoded = base64.b64encode(buffer)
+            data["image"]=buffer_b64encoded.decode('utf-8')
+        if (status=="error"):
+            print ("Error:",file=sys.stderr, flush=True)
+            print (data)
         return jsonify(data)
     else:
+        retval, buffer = cv2.imencode('.png', imgOut)
         response=make_response(buffer.tobytes())
         response.headers['Content-Type'] = 'image/png'
         buffer_bytes=buffer.tobytes()
