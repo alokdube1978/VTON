@@ -100,3 +100,39 @@ for preview image - when marking thorax points via admin panel
 it overlays jewellery_image on the final provided human_image when using the overlayimage end point
 
 
+Response Format:
+
+status field in the response indicates "success" or "error"
+
+
+A working response will be:
+
+{ 
+"image":"(base64 overlayed image)",
+"message": "",
+ "status": "success"
+} 
+
+if there is an error , "image" will not be returned, instead we will have 
+{ 
+"message": "(error message)",
+ "status": "error"
+}
+
+Possible errors are::
+
+"Unable to extract data from input" -- occurs when the params are wrong/not set/not parseable
+
+ 
+
+"Invalid Coordinates for Jewellery" -- if jewellery thorax coordinates are wrong like 0,0 etc or outside jewellery pic dimensions
+
+ 
+
+ 
+
+"Unable to determine Jewellery points" -- if not able to parse the jewellery image due to bad image
+
+ 
+
+"Unable to extract Facial Landmark points from human image" --- if we cannot determine thorax points or shoulder points from given human image
