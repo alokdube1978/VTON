@@ -119,20 +119,12 @@ if there is an error , "image" will not be returned, instead we will have
  "status": "error"
 }
 
-Possible errors are::
+Possible error messages are::
 
 "Unable to extract data from input" -- occurs when the params are wrong/not set/not parseable
 
- 
-
 "Invalid Coordinates for Jewellery" -- if jewellery thorax coordinates are wrong like 0,0 etc or outside jewellery pic dimensions
 
- 
-
- 
-
 "Unable to determine Jewellery points" -- if not able to parse the jewellery image due to bad image
-
- 
 
 "Unable to extract Facial Landmark points from human image" --- if we cannot determine thorax points or shoulder points from given human image
