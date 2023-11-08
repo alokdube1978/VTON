@@ -365,7 +365,7 @@ def preview():
     
     if (status=="success"):
     
-        human_image=cv2.imread('./overlay/human_image8.jpg',cv2.IMREAD_UNCHANGED)
+        human_image=cv2.imread('./overlay/public3.jpg',cv2.IMREAD_UNCHANGED)
         if (human_image.shape[0]>400 and human_image.shape[1]>400):
             human_image=resizeAndPad(human_image,(400,400))
             print("resizing human_image as both >400",file=sys.stderr, flush=True)
