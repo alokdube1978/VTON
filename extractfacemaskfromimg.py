@@ -170,10 +170,10 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
         xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
     
-    # if (xy_coordinate_positions["horizontal_reduced_circle_radius"]>xy_coordinate_positions["vertical_reduced_circle_radius"]):
-        # print("Retaining same scale")
-        # xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
-        # xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
+    # if we are too wide on the vertical scale - we tie it to horizontal scale
+    if ((xy_coordinate_positions["vertical_reduced_circle_radius"]/xy_coordinate_positions["horizontal_reduced_circle_radius"]))>1.15:
+        xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
+        xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
     
     vertical_reduced_circle_radius=xy_coordinate_positions["vertical_reduced_circle_radius"]
     horizontal_reduced_circle_radius=xy_coordinate_positions["horizontal_reduced_circle_radius"]

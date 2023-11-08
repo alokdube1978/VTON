@@ -229,11 +229,11 @@ def overlayimage():
         ## For exmaple, if using necklace11, use thorax_top and thorax_bottom from necklace7 above
         #necklace11
         jewellery_position={
-            'thorax_top':[162,180],
-            'thorax_bottom':[162,357],
+            'thorax_top':[180,180],
+            'thorax_bottom':[180,357]
         }
         jewellery_image=cv2.imread("./overlay/necklace11.png",cv2.IMREAD_UNCHANGED)
-        human_image=cv2.imread("./overlay/human_image18.png",cv2.IMREAD_UNCHANGED)
+        human_image=cv2.imread("./overlay/human_image21.jpg",cv2.IMREAD_UNCHANGED)
     if (status=="success"):    
         if (human_image.shape[2]==4):
             print("Converting PNG to BGR")
@@ -357,8 +357,8 @@ def preview():
     else:
         #necklace11.png
         jewellery_position={
-                'thorax_top':[175,187],
-                'thorax_bottom':[175,364],
+                'thorax_top':[180,180],
+                'thorax_bottom':[180,357]
             }
         jewellery_image=cv2.imread("./overlay/necklace11.png",cv2.IMREAD_UNCHANGED)
     

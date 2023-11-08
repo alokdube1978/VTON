@@ -357,11 +357,11 @@ def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=F
     yadd=round(abs(yadd))
     perspective_masked_image=cv2.warpPerspective(masked_image,M,(masked_image.shape[1]+xadd, masked_image.shape[0]+yadd),flags=cv2.INTER_LINEAR)
     
-    print ("jewellery position",file=sys.stderr, flush=True)
-    print(jewellery_position,file=sys.stderr, flush=True)
+    # print ("jewellery position",file=sys.stderr, flush=True)
+    # print(jewellery_position,file=sys.stderr, flush=True)
     
-    print ("jewellery xy position",file=sys.stderr, flush=True)
-    print(jewellery_xy_position,file=sys.stderr, flush=True)
+    # print ("jewellery xy position",file=sys.stderr, flush=True)
+    # print(jewellery_xy_position,file=sys.stderr, flush=True)
     
     return (perspective_masked_image,masked_image,jewellery_position,face_position)
 
@@ -425,7 +425,7 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
 def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=False):
     global interested_points
     try:
-        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER)
+        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale)
         human_image_copy=human_image.copy()
     except:
         raise Exception("Unable to extract Facial Landmark points from human image")
