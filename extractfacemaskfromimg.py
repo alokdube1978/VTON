@@ -170,8 +170,10 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
         xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
     
-    # if we are too wide on the vertical scale - we tie it to horizontal scale
-    if ((xy_coordinate_positions["vertical_reduced_circle_radius"]/xy_coordinate_positions["horizontal_reduced_circle_radius"]))>1.25:
+    # if we are too wide on the vertical scale or horizontal scale- we tie it to horizontal scale
+    if ((xy_coordinate_positions["vertical_reduced_circle_radius"]/xy_coordinate_positions["horizontal_reduced_circle_radius"])>1.23
+        or (xy_coordinate_positions["horizontal_reduced_circle_radius"]/xy_coordinate_positions["vertical_reduced_circle_radius"])>1.23
+        ):
         xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
         xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
     
@@ -194,9 +196,12 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
     
         
-    if ((abs(math.degrees(math.atan(nose_slope)))>=80 and abs(math.degrees(math.atan(nose_slope))) <=100 ) and (abs(math.degrees(math.atan(shoulder_slope)))>5)) :
+    if ((abs(math.degrees(math.atan(nose_slope)))>=80 and abs(math.degrees(math.atan(nose_slope))) <=100 ) and (abs(math.degrees(math.atan(shoulder_slope)))>7)) :
        print ("Resetting shoulder slope as nose slope is vertical",file=sys.stderr, flush=True)
-       shoulder_slope=abs(math.atan(nose_slope))-math.pi/2
+       if ((math.atan(nose_slope)>=0) and (math.atan(nose_slope)<=90)):
+            shoulder_slope=abs(math.atan(nose_slope))-math.pi/2
+       else:
+           shoulder_slope=math.pi/2-abs(math.atan(nose_slope))
        xy_coordinate_positions["shoulder_slope"]=shoulder_slope
        print("Reset Shoulder slope",file=sys.stderr, flush=True)
        print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
