@@ -392,7 +392,7 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
         human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale)
         human_image_copy=human_image.copy()
     except:
-        raise Exception("Please ensure your shoulders are horizontal and your face vertical, with ears visible")
+        raise Exception("Please ensure your shoulders are horizontal and your face vertical, with both ears visible")
         
     try:    
         perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug=True)
