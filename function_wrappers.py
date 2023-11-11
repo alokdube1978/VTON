@@ -183,7 +183,7 @@ def data_uri_to_cv2_img(uri):
 
 
 
-def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=True,use_different_horizontal_vertical_scale=False):
+def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=False,debug=True,use_different_horizontal_vertical_scale=False):
     imgOut=overlay.get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER,debug,use_different_horizontal_vertical_scale)
     return imgOut
 
@@ -273,7 +273,7 @@ def overlayimage():
     
     if (status=="success"):
         try:
-            imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=True)
+            imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False,debug=False,use_different_horizontal_vertical_scale=True)
         except Exception as e:
             status="error"
             message=str(e)
@@ -365,7 +365,7 @@ def preview():
     
     if (status=="success"):
     
-        human_image=cv2.imread('./overlay/public3.jpg',cv2.IMREAD_UNCHANGED)
+        human_image=cv2.imread('./overlay/human_image22.jpg',cv2.IMREAD_UNCHANGED)
         if (human_image.shape[0]>400 and human_image.shape[1]>400):
             human_image=resizeAndPad(human_image,(400,400))
             print("resizing human_image as both >400",file=sys.stderr, flush=True)
