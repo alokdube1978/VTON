@@ -233,7 +233,7 @@ def overlayimage():
             'thorax_bottom':[180,357]
         }
         jewellery_image=cv2.imread("./overlay/necklace11.png",cv2.IMREAD_UNCHANGED)
-        human_image=cv2.imread("./overlay/human_image21.jpg",cv2.IMREAD_UNCHANGED)
+        human_image=cv2.imread("./overlay/public3.jpg",cv2.IMREAD_UNCHANGED)
     if (status=="success"):    
         if (human_image.shape[2]==4):
             print("Converting PNG to BGR")
