@@ -67,8 +67,8 @@ def resizeAndPad(img, size, padColor=255):
 
     # # #necklace2.jpg
     # jewellery_position={
-    # 'thorax_top':[184,165],
-    # 'thorax_bottom':[184,403],
+    # 'thorax_top':[184,140],
+    # 'thorax_bottom':[184,388],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[306,304],
     # 'right_shoulder_pivot':[84,304]
@@ -268,7 +268,7 @@ def overlayimage():
     
     if (status=="success"):
         try:
-            imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True)
+            imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False,debug=False,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True)
             if (imgOut.shape[0]>400 and imgOut.shape[1]>400):
                 imgOut=resizeAndPad(imgOut,(400,400))
                 print("resizing Output Image as both >400",file=sys.stderr, flush=True)
@@ -366,7 +366,7 @@ def preview():
     
     if (status=="success"):
     
-        human_image=cv2.imread('./overlay/public3.jpg',cv2.IMREAD_UNCHANGED)
+        human_image=cv2.imread('./overlay/human_image20.jpg',cv2.IMREAD_UNCHANGED)
         
             
         print(time.time(),file=sys.stderr, flush=True)
@@ -393,7 +393,7 @@ def preview():
     
     if (status=="success"):
         try:
-            imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True)
+            imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True)
             if (imgOut.shape[0]>400 and imgOut.shape[1]>400):
                 imgOut=resizeAndPad(imgOut,(400,400))
                 print("resizing Output Image as both >400",file=sys.stderr, flush=True)

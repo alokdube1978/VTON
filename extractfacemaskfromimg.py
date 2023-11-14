@@ -128,24 +128,25 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         if (RUN_CV_SELFIE_SEGMENTER==True):
 
                 imgOut = Selfie_segmentor.removeBG(img, imgBg=BG_COLOR, cutThreshold=0.48)
-        # cv2.imshow("Selfie Masked",imgOut)
-        #we run it once more through mediapipe selife segmentor
+        else:
+                imgOut=img
+        # # cv2.imshow("Selfie Masked",imgOut)
+        # #we run it once more through mediapipe selife segmentor
         
-        if (RUN_CV_SELFIE_SEGMENTER==False):
-            print("second Segmenter")
-            human_image_tf = mp.Image(image_format=mp.ImageFormat.SRGB, data=img)
-            with vision.ImageSegmenter.create_from_options(options) as segmenter:
-                segmentation_result = segmenter.segment(human_image_tf)
-            image_data=human_image_tf.numpy_view().copy()
-            category_mask = segmentation_result.category_mask
-            bg_image = np.zeros(image_data.shape, dtype=np.uint8)
-            bg_image[:] = BG_COLOR
-            category_mask_condition=np.stack((category_mask.numpy_view(),) * 3, axis=-1) > 0.9
-            imgOut = np.where(category_mask_condition,  bg_image,image_data)
+        # if (RUN_CV_SELFIE_SEGMENTER==False):
+            # print("second Segmenter")
+            # human_image_tf = mp.Image(image_format=mp.ImageFormat.SRGB, data=img)
+            # with vision.ImageSegmenter.create_from_options(options) as segmenter:
+                # segmentation_result = segmenter.segment(human_image_tf)
+            # image_data=human_image_tf.numpy_view().copy()
+            # category_mask = segmentation_result.category_mask
+            # bg_image = np.zeros(image_data.shape, dtype=np.uint8)
+            # bg_image[:] = BG_COLOR
+            # category_mask_condition=np.stack((category_mask.numpy_view(),) * 3, axis=-1) > 0.9
+            # imgOut = np.where(category_mask_condition,  bg_image,image_data)
         # cv2.imshow("BG Masked",imgOut)
-        
     with lock:
-        pose=detector.findPose(imgOut,draw=False)
+        pose=detector.findPose(img,draw=False)
     
         
     
@@ -240,7 +241,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
     
         
-    if ((abs(math.degrees(math.atan(nose_slope)))>=80 and abs(math.degrees(math.atan(nose_slope))) <=100 ) and (abs(math.degrees(math.atan(shoulder_slope)))>7)) :
+    if ((abs(math.degrees(math.atan(nose_slope)))>=83 and abs(math.degrees(math.atan(nose_slope))) <=97 ) and (abs(math.degrees(math.atan(shoulder_slope)))>5)) :
        print ("Resetting shoulder slope as nose slope is vertical",file=sys.stderr, flush=True)
        if ((math.atan(nose_slope)>=0) and (math.atan(nose_slope)<=90)):
             shoulder_slope=abs(math.atan(nose_slope))-math.pi/2
