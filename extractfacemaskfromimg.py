@@ -237,14 +237,14 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     xy_coordinate_positions["shoulder_slope"]=shoulder_slope
     
     #we align with nose thorax slope if it is off upto 10 degrees rather than shoulder slope 
-    # if shoulder slope >5
+    # if shoulder slope >3.5
     print ("Original Nose Slope",file=sys.stderr, flush=True)
     print(math.degrees(math.atan(xy_coordinate_positions["nose_slope"])),file=sys.stderr, flush=True)
     print ("Original Shoulder Slope",file=sys.stderr, flush=True)
     print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
     
         
-    if ((abs(math.degrees(math.atan(nose_slope)))>=83 and abs(math.degrees(math.atan(nose_slope))) <=97 ) and (abs(math.degrees(math.atan(shoulder_slope)))>5)) :
+    if ((abs(math.degrees(math.atan(nose_slope)))>=83 and abs(math.degrees(math.atan(nose_slope))) <=97 ) and (abs(math.degrees(math.atan(shoulder_slope)))>3.5)) :
        print ("Resetting shoulder slope as nose slope is vertical",file=sys.stderr, flush=True)
        if ((math.atan(nose_slope)>=0) and (math.atan(nose_slope)<=90)):
             shoulder_slope=abs(math.atan(nose_slope))-math.pi/2
