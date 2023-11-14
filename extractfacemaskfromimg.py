@@ -127,9 +127,11 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     with lock:
         if (RUN_CV_SELFIE_SEGMENTER==True):
 
-                imgOut = Selfie_segmentor.removeBG(img, imgBg=BG_COLOR, cutThreshold=0.48)
+                rembg_image = Selfie_segmentor.removeBG(img, imgBg=BG_COLOR, cutThreshold=0.48)
+                imgOut=rembg_image
         else:
                 imgOut=img
+                rembg_image=Selfie_segmentor.removeBG(img, imgBg=BG_COLOR, cutThreshold=0.48)
         # # cv2.imshow("Selfie Masked",imgOut)
         # #we run it once more through mediapipe selife segmentor
         
