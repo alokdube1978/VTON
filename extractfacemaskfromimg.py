@@ -50,7 +50,7 @@ options = vision.ImageSegmenterOptions(base_options=base_options,running_mode=Vi
 with open(mp_model_path, 'rb') as mp_f:
     mp_model_data = mp_f.read()
 mp_options = PoseLandmarkerOptions(
-base_options=BaseOptions(model_asset_path=mp_model_path),running_mode=VisionRunningMode.IMAGE)
+base_options=BaseOptions(model_asset_buffer=mp_model_data),running_mode=VisionRunningMode.IMAGE)
 
 Selfie_segmentor = SelfiSegmentation(model=0)
 pp = pprint.PrettyPrinter(indent=4)
@@ -161,7 +161,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     "left_ear":lmList[7][:2],
     "right_ear":lmList[8][:2],
     }
-    #we get normalized z depth of shoulders too for reference
+    #we get normalized z depth of shoulders too for reference, we use imgOut here 
     with PoseLandmarker.create_from_options(mp_options) as landmarker:
         rgb_image = cv2.cvtColor(imgOut, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image)
@@ -182,7 +182,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         
         
         # if we need to ensure shoulders are aligned in z plane - we return error if they are not aligned
-        if (force_shoulder_z_alignment==True and (abs(positions["mp_left_right_shoulder_z_distance"])>0.18)):
+        if (force_shoulder_z_alignment==True and (abs(positions["mp_left_right_shoulder_z_distance"])>0.2)):
             print("Error!! Z values of left and right shoulder points not aligned")
             raise Exception('force_shoulder_z_alignment')
         
