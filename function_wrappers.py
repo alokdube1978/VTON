@@ -36,7 +36,7 @@ def resizeAndPad(img, size, padColor=255):
         pad_horz = float(sw - new_w) / 2
         pad_left, pad_right = np.floor(pad_horz).astype(int), np.ceil(pad_horz).astype(int)
         pad_top, pad_bot = 0, 0
-
+        
     elif (saspect < aspect) or ((saspect == 1) and (aspect >= 1)):  # new vertical image
         new_w = sw
         new_h = np.round(float(new_w) / aspect).astype(int)
@@ -183,8 +183,8 @@ def data_uri_to_cv2_img(uri):
 
 
 
-def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=False,debug=True,use_different_horizontal_vertical_scale=False):
-    imgOut=overlay.get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER,debug,use_different_horizontal_vertical_scale)
+def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=False,debug=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False):
+    imgOut=overlay.get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER,debug,use_different_horizontal_vertical_scale,force_shoulder_z_alignment)
     return imgOut
 
 
@@ -233,18 +233,13 @@ def overlayimage():
             'thorax_bottom':[180,357]
         }
         jewellery_image=cv2.imread("./overlay/necklace11.png",cv2.IMREAD_UNCHANGED)
-        human_image=cv2.imread("./overlay/public3.jpg",cv2.IMREAD_UNCHANGED)
+        human_image=cv2.imread("./overlay/human_image21.jpg",cv2.IMREAD_UNCHANGED)
     if (status=="success"):    
         if (human_image.shape[2]==4):
             print("Converting PNG to BGR")
             human_image=cv2.cvtColor(human_image, cv2.COLOR_BGRA2BGR)
             
-        if (human_image.shape[0]>400 and human_image.shape[1]>400):
-            human_image=resizeAndPad(human_image,(400,400))
-            print("resizing human_image as both >400",file=sys.stderr, flush=True)
-        elif (human_image.shape[0]>800 or human_image.shape[1]>800):
-            human_image=resizeAndPad(human_image,(500,500))
-            print("resizing human_image as one width or heigh>800",file=sys.stderr, flush=True)
+        
             
         # imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
         print(time.time(),file=sys.stderr, flush=True)
@@ -273,7 +268,13 @@ def overlayimage():
     
     if (status=="success"):
         try:
-            imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False,debug=False,use_different_horizontal_vertical_scale=True)
+            imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True)
+            if (imgOut.shape[0]>400 and imgOut.shape[1]>400):
+                imgOut=resizeAndPad(imgOut,(400,400))
+                print("resizing Output Image as both >400",file=sys.stderr, flush=True)
+            elif (imgOut.shape[0]>600 or imgOut.shape[1]>600):
+                imgOut=resizeAndPad(imgOut,(500,500))
+                print("resizing Output as one >600",file=sys.stderr, flush=True)
         except Exception as e:
             status="error"
             message=str(e)
@@ -288,7 +289,7 @@ def overlayimage():
     
     if (status=="success"):
         retval, buffer = cv2.imencode('.png', imgOut)
-    if (request.method=="POST"):
+    if (request.method=="POST" ):
         data = { 
                 "status" : status, 
                 "message" : message,
@@ -365,13 +366,8 @@ def preview():
     
     if (status=="success"):
     
-        human_image=cv2.imread('./overlay/human_image22.jpg',cv2.IMREAD_UNCHANGED)
-        if (human_image.shape[0]>400 and human_image.shape[1]>400):
-            human_image=resizeAndPad(human_image,(400,400))
-            print("resizing human_image as both >400",file=sys.stderr, flush=True)
-        elif (human_image.shape[0]>600 or human_image.shape[1]>600):
-            human_image=resizeAndPad(human_image,(500,500))
-            print("resizing human_image as one >600",file=sys.stderr, flush=True)
+        human_image=cv2.imread('./overlay/public3.jpg',cv2.IMREAD_UNCHANGED)
+        
             
         print(time.time(),file=sys.stderr, flush=True)
         print ("Jewellery Image dimensions:",file=sys.stderr, flush=True)
@@ -397,7 +393,14 @@ def preview():
     
     if (status=="success"):
         try:
-            imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=True)
+            imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True)
+            if (imgOut.shape[0]>400 and imgOut.shape[1]>400):
+                imgOut=resizeAndPad(imgOut,(400,400))
+                print("resizing Output Image as both >400",file=sys.stderr, flush=True)
+            elif (imgOut.shape[0]>600 or imgOut.shape[1]>600):
+                imgOut=resizeAndPad(imgOut,(500,500))
+                print("resizing Output as one >600",file=sys.stderr, flush=True)
+        
         except Exception as e:
             status="error"
             message=str(e)

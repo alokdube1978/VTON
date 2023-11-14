@@ -14,13 +14,21 @@ from mediapipe.python._framework_bindings import image_frame
 from mediapipe.tasks.python import vision
 from mediapipe import tasks
 
+POSEDETECTOR_BODY_PARTS=["nose","left eye (inner)","left eye","left eye (outer)","right eye (inner)",
+"right eye","right eye (outer)","left ear","right ear","mouth (left)","mouth (right)",
+"left shoulder","right shoulder","left elbow","right elbow","left wrist","right wrist",
+"left pinky","right pinky","left index","right index","left thumb","right thumb",
+"left hip","right hip","left knee","right knee","left ankle","right ankle",
+"left heel","right heel","left foot index","right foot index"]
+
 lock = threading.Lock()  # a lock on global scope, or self.lock = threading.Lock() in your class's __init_
-    
+
 
 np.seterr(divide='ignore', invalid='ignore')
 input_path = './overlay/public2.jpg'
 output_path="./overlay/human_image6.jpg"
 model_path="./Models/selfie_segmenter.tflite"
+mp_model_path = './Models/pose_landmarker_heavy.task'
 
 
 BaseOptions = mp.tasks.BaseOptions
@@ -28,12 +36,21 @@ ImageSegmenter = mp.tasks.vision.ImageSegmenter
 ImageSegmenterOptions = mp.tasks.vision.ImageSegmenterOptions
 VisionRunningMode = mp.tasks.vision.RunningMode
 
+#we also try pose landmarker directly from base model
+PoseLandmarker = mp.tasks.vision.PoseLandmarker
+PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
+
 with open(model_path, 'rb') as f:
     model_data = f.read()
 base_options = BaseOptions(model_asset_buffer=model_data)
 options = vision.ImageSegmenterOptions(base_options=base_options,running_mode=VisionRunningMode.IMAGE,
                                               output_category_mask=1)
 
+
+with open(mp_model_path, 'rb') as mp_f:
+    mp_model_data = mp_f.read()
+mp_options = PoseLandmarkerOptions(
+base_options=BaseOptions(model_asset_path=mp_model_path),running_mode=VisionRunningMode.IMAGE)
 
 Selfie_segmentor = SelfiSegmentation(model=0)
 pp = pprint.PrettyPrinter(indent=4)
@@ -102,9 +119,9 @@ def get_midpoint(p1,p2):
                         
 
 
-def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False):
+def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False):
     global lock
-    global pose,detector,options,base_options
+    global pose,detector,options,base_options,POSEDETECTOR_BODY_PARTS
     xy_coordinate_positions={}
     
     with lock:
@@ -140,10 +157,37 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     "right_eye": lmList[6][:2],
     "nose" : lmList[0][:2],
     "left_shoulder" : lmList[11][:2],
-    "right_shoulder" : lmList[12][:2]
+    "right_shoulder" : lmList[12][:2],
+    "left_ear":lmList[7][:2],
+    "right_ear":lmList[8][:2],
     }
-    # print("Positions",file=sys.stderr, flush=True)
-    # print(positions,file=sys.stderr, flush=True)
+    #we get normalized z depth of shoulders too for reference
+    with PoseLandmarker.create_from_options(mp_options) as landmarker:
+        rgb_image = cv2.cvtColor(imgOut, cv2.COLOR_BGR2RGB)
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image)
+        image_height, image_width, _ = rgb_image.shape
+        pose_landmarker_result = landmarker.detect(mp_image)
+        # print(pose_landmarker_result,file=sys.stderr, flush=True)
+        mp_pose_landmark_list={}
+        for index, elem in enumerate(POSEDETECTOR_BODY_PARTS):
+                x=round(pose_landmarker_result.pose_landmarks[0][index].x*image_width)
+                y=round(pose_landmarker_result.pose_landmarks[0][index].y*image_height)
+                z=pose_landmarker_result.pose_landmarks[0][index].z
+                # print(elem,":",pose_landmarker_result.pose_landmarks[0][index])
+                mp_pose_landmark_list[elem]=[]
+                mp_pose_landmark_list[elem]=[x,y,z]
+        positions.update({
+            "mp_left_right_shoulder_z_distance":mp_pose_landmark_list["left shoulder"][2]-mp_pose_landmark_list["right shoulder"][2],
+            })
+        
+        
+        # if we need to ensure shoulders are aligned in z plane - we return error if they are not aligned
+        if (force_shoulder_z_alignment==True and (abs(positions["mp_left_right_shoulder_z_distance"])>0.18)):
+            print("Error!! Z values of left and right shoulder points not aligned")
+            raise Exception('force_shoulder_z_alignment')
+        
+    print("Positions",file=sys.stderr, flush=True)
+    print(positions,file=sys.stderr, flush=True)
     xy_coordinate_positions=get_xy_coordinate_positions(positions)
     xy_coordinate_positions["thorax_top"]=[0,0]
     xy_coordinate_positions["thorax_bottom"]=[0,0]

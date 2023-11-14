@@ -242,8 +242,8 @@ def get_jewellery_image_mask(img):
     return (masked_image)
 
 
-def get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False):
-    human_image,face_position=extract_face.getSelfieImageandFaceLandMarkPoints(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale)
+def get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False):
+    human_image,face_position=extract_face.getSelfieImageandFaceLandMarkPoints(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment)
     human_image_tf = mp.Image(image_format=mp.ImageFormat.SRGB, data=human_image)
     with vision.ImageSegmenter.create_from_options(options) as segmenter:
         segmentation_result = segmenter.segment(human_image_tf)
@@ -385,14 +385,14 @@ def overlay_jewellery_on_face(jewellery_position,face_position,human_image,persp
     
     
     
-def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False):
+def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False):
     # human_image=cv2.imread(human_path,cv2.IMREAD_UNCHANGED)
     global interested_points
     try:
-        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale)
+        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment)
         human_image_copy=human_image.copy()
     except:
-        raise Exception("Please ensure your shoulders are horizontal and your face vertical, with both ears visible")
+        raise Exception("Please ensure your shoulders are horizontal and your face is vertical and they are both facing the camera")
         
     try:    
         perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug=True)
@@ -422,13 +422,14 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
     
     
 
-def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=False):
+def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False):
     global interested_points
     try:
-        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale)
+        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment)
         human_image_copy=human_image.copy()
     except:
-        raise Exception("Unable to extract Facial Landmark points from human image")
+        raise Exception("Please ensure your shoulders are horizontal and your face is vertical and they are both facing the camera")
+        
     
     try:
         perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug)
