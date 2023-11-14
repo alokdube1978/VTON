@@ -366,7 +366,7 @@ def preview():
     
     if (status=="success"):
     
-        human_image=cv2.imread('./overlay/human_image22.jpg',cv2.IMREAD_UNCHANGED)
+        human_image=cv2.imread('./overlay/human_image20.jpg',cv2.IMREAD_UNCHANGED)
         
             
         print(time.time(),file=sys.stderr, flush=True)
