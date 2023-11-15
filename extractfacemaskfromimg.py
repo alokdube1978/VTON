@@ -164,7 +164,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     "left_ear":lmList[7][:2],
     "right_ear":lmList[8][:2],
     }
-    #we get normalized z depth of shoulders too for reference, we use original image img here
+    #we get normalized z depth of shoulders too for reference, we use original img here
     #image without background is better able to detect z depth
     with PoseLandmarker.create_from_options(mp_options) as landmarker:
         rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -186,7 +186,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         
         
         # if we need to ensure shoulders are aligned in z plane - we return error if they are not aligned
-        if (force_shoulder_z_alignment==True and (abs(positions["mp_left_right_shoulder_z_distance"])>0.2)):
+        if (force_shoulder_z_alignment==True and (abs(positions["mp_left_right_shoulder_z_distance"])>0.265)):
             print("Error!! Z values of left and right shoulder points not aligned")
             raise Exception('force_shoulder_z_alignment')
         
@@ -235,6 +235,10 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     shoulder_slope,shoulder_intercept=slope_intercept(xy_coordinate_positions["left_shoulder"],xy_coordinate_positions["right_shoulder"])
     xy_coordinate_positions["nose_slope"]=nose_slope
     xy_coordinate_positions["shoulder_slope"]=shoulder_slope
+    
+    
+    
+    
     
     #we align with nose thorax slope if it is off upto 10 degrees rather than shoulder slope 
     # if shoulder slope >3.5
@@ -302,7 +306,11 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     xy_coordinate_positions["thorax_bottom"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+vertical_reduced_circle_radius*math.cos(-1*math.pi/2+math.atan(shoulder_slope)))
     xy_coordinate_positions["thorax_bottom"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+vertical_reduced_circle_radius*math.sin(-1*math.pi/2+math.atan(shoulder_slope)))
     
-
+    print ("Degrees shoulder:",math.degrees(abs(math.atan(xy_coordinate_positions["shoulder_slope"])))," Degrees nose:",math.degrees(abs(math.atan(xy_coordinate_positions["nose_slope"]))),file=sys.stderr, flush=True)
+    if (math.degrees(abs(math.atan(xy_coordinate_positions["shoulder_slope"])))>7.9 or math.degrees(abs(math.atan(xy_coordinate_positions["nose_slope"])))<67):
+        print("Error!!shoulder or nose slope needs correction- shoulder:",math.degrees(abs(math.atan(xy_coordinate_positions["shoulder_slope"]))),"nose:",math.degrees(abs(math.atan(xy_coordinate_positions["nose_slope"]))),file=sys.stderr, flush=True)
+        raise Exception('shoulder or nose slope needs correction',math.degrees(abs(math.atan(xy_coordinate_positions["shoulder_slope"]))),math.degrees(abs(math.atan(xy_coordinate_positions["nose_slope"]))))
+    
     # print("reduced circle")
     # print(xy_coordinate_positions["reduced_circle_radius"])
     positions=img_position_from_xy_coordinate_positions(xy_coordinate_positions)

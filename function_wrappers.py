@@ -300,7 +300,7 @@ def overlayimage():
             data["image"]=buffer_b64encoded.decode('utf-8')
         if (status=="error"):
             print ("Error:",file=sys.stderr, flush=True)
-            print (data)
+            print (data,file=sys.stderr, flush=True)
         return jsonify(data)
     else:
         response=make_response(buffer.tobytes())
@@ -426,7 +426,7 @@ def preview():
             data["image"]=buffer_b64encoded.decode('utf-8')
         if (status=="error"):
             print ("Error:",file=sys.stderr, flush=True)
-            print (data)
+            print (data,file=sys.stderr, flush=True)
         return jsonify(data)
     else:
         retval, buffer = cv2.imencode('.png', imgOut)
