@@ -164,10 +164,10 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     "left_ear":lmList[7][:2],
     "right_ear":lmList[8][:2],
     }
-    #we get normalized z depth of shoulders too for reference, we use rembg_image here
+    #we get normalized z depth of shoulders too for reference, we use original image img here
     #image without background is better able to detect z depth
     with PoseLandmarker.create_from_options(mp_options) as landmarker:
-        rgb_image = cv2.cvtColor(rembg_image, cv2.COLOR_BGR2RGB)
+        rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image)
         image_height, image_width, _ = rgb_image.shape
         pose_landmarker_result = landmarker.detect(mp_image)

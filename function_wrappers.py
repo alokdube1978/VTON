@@ -67,8 +67,8 @@ def resizeAndPad(img, size, padColor=255):
 
     # # #necklace2.jpg
     # jewellery_position={
-    # 'thorax_top':[184,140],
-    # 'thorax_bottom':[184,388],
+    # 'thorax_top':[184,155],
+    # 'thorax_bottom':[184,393],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[306,304],
     # 'right_shoulder_pivot':[84,304]
