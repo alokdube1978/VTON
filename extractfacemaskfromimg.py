@@ -14,6 +14,12 @@ from mediapipe.python._framework_bindings import image_frame
 from mediapipe.tasks.python import vision
 from mediapipe import tasks
 
+
+degrees_shoulder_slope_max=3.5
+degrees_nose_slope_max=97
+degrees_nose_slope_min=83
+normalized_z_limit=0.265
+
 POSEDETECTOR_BODY_PARTS=["nose","left eye (inner)","left eye","left eye (outer)","right eye (inner)",
 "right eye","right eye (outer)","left ear","right ear","mouth (left)","mouth (right)",
 "left shoulder","right shoulder","left elbow","right elbow","left wrist","right wrist",
@@ -122,6 +128,7 @@ def get_midpoint(p1,p2):
 def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False):
     global lock
     global pose,detector,options,base_options,POSEDETECTOR_BODY_PARTS
+    global degrees_nose_slope_max, degrees_shoulder_slope_max,degrees_nose_slope_min,normalized_z_limit
     xy_coordinate_positions={}
     
     with lock:
@@ -248,18 +255,35 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
     
         
-    if ((abs(math.degrees(math.atan(nose_slope)))>=83 and abs(math.degrees(math.atan(nose_slope))) <=97 ) and (abs(math.degrees(math.atan(shoulder_slope)))>3.5)) :
-       print ("Resetting shoulder slope as nose slope is vertical",file=sys.stderr, flush=True)
+    orig_nose_slope=xy_coordinate_positions["nose_slope"]
+    orig_shoulder_slope=xy_coordinate_positions["shoulder_slope"]   
+    if ((abs(math.degrees(math.atan(nose_slope)))>=degrees_nose_slope_min and abs(math.degrees(math.atan(nose_slope))) <=degrees_nose_slope_max ) and (abs(math.degrees(math.atan(shoulder_slope)))>degrees_shoulder_slope_max)) :
+       print ("Trying to Reset shoulder slope as nose slope is vertical",file=sys.stderr, flush=True)
        if ((math.atan(nose_slope)>=0) and (math.atan(nose_slope)<=90)):
-            shoulder_slope=abs(math.atan(nose_slope))-math.pi/2
+            shoulder_slope=math.tan(math.radians(math.degrees(abs(math.atan(nose_slope)))-90))
        else:
-           shoulder_slope=math.pi/2-abs(math.atan(nose_slope))
-       xy_coordinate_positions["shoulder_slope"]=shoulder_slope
-       print("Reset Shoulder slope",file=sys.stderr, flush=True)
-       print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
-       
+           shoulder_slope=math.tan(math.radians(90-math.degrees(abs(math.atan(nose_slope)))))
+           
+       if (abs(shoulder_slope)<abs(orig_shoulder_slope)):    
+           xy_coordinate_positions["shoulder_slope"]=shoulder_slope
+           print("Reset Shoulder slope",file=sys.stderr, flush=True)
+           print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
+       else:
+           xy_coordinate_positions["shoulder_slope"]=orig_shoulder_slope
  
-    
+    elif (((abs(math.degrees(math.atan(nose_slope)))<degrees_nose_slope_min or abs(math.degrees(math.atan(nose_slope))) >degrees_nose_slope_max )) and (abs(math.degrees(math.atan(shoulder_slope)))<degrees_shoulder_slope_max)) :
+       print ("Trying to Reset nose slope as shoulder slope is horizontal",file=sys.stderr, flush=True)
+       if ((math.atan(nose_slope)>=0) and (math.atan(nose_slope)<=90)):
+           nose_slope=math.tan(math.radians(math.degrees(math.atan(shoulder_slope)) - 90))
+       else:
+           nose_slope=math.tan(math.radians(90+ math.degrees(math.atan(shoulder_slope))))
+       
+       if ((90-abs(math.degrees(math.atan(nose_slope))))<(90-abs(math.degrees(math.atan(orig_nose_slope))))):
+            xy_coordinate_positions["nose_slope"]=nose_slope
+            print("Reset Nose slope",file=sys.stderr, flush=True)
+            print(math.degrees(math.atan(xy_coordinate_positions['nose_slope'])),file=sys.stderr, flush=True)
+       else:
+           xy_coordinate_positions["nose_slope"]=orig_nose_slope
     
     # print("----shoulder slope,intercept----",file=sys.stderr, flush=True)
     # print (shoulder_slope,shoulder_intercept,file=sys.stderr, flush=True)
