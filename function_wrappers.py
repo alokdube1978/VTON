@@ -183,8 +183,8 @@ def data_uri_to_cv2_img(uri):
 
 
 
-def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=False,debug=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False):
-    imgOut=overlay.get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER,debug,use_different_horizontal_vertical_scale,force_shoulder_z_alignment)
+def get_masked_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=False,debug=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False,use_cv_pose_detector=True):
+    imgOut=overlay.get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER,debug,use_different_horizontal_vertical_scale,force_shoulder_z_alignment,use_cv_pose_detector)
     return imgOut
 
 
@@ -268,7 +268,7 @@ def overlayimage():
     
     if (status=="success"):
         try:
-            imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False,debug=False,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True)
+            imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False,debug=False,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True,use_cv_pose_detector=False)
             if (imgOut.shape[0]>400 and imgOut.shape[1]>400):
                 imgOut=resizeAndPad(imgOut,(400,400))
                 print("resizing Output Image as both >400",file=sys.stderr, flush=True)
@@ -289,7 +289,7 @@ def overlayimage():
     
     if (status=="success"):
         retval, buffer = cv2.imencode('.png', imgOut)
-    if (request.method=="POST" ):
+    if (request.method=="POST"):
         data = { 
                 "status" : status, 
                 "message" : message,
@@ -393,7 +393,7 @@ def preview():
     
     if (status=="success"):
         try:
-            imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True)
+            imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True,use_cv_pose_detector=False)
             if (imgOut.shape[0]>400 and imgOut.shape[1]>400):
                 imgOut=resizeAndPad(imgOut,(400,400))
                 print("resizing Output Image as both >400",file=sys.stderr, flush=True)

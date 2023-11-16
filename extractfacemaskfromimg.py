@@ -18,7 +18,7 @@ from mediapipe import tasks
 degrees_shoulder_slope_max=3.5
 degrees_nose_slope_max=97
 degrees_nose_slope_min=83
-normalized_z_limit=0.265
+normalized_z_limit=0.2
 
 POSEDETECTOR_BODY_PARTS=["nose","left eye (inner)","left eye","left eye (outer)","right eye (inner)",
 "right eye","right eye (outer)","left ear","right ear","mouth (left)","mouth (right)",
@@ -125,11 +125,12 @@ def get_midpoint(p1,p2):
                         
 
 
-def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False):
+def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False,use_cv_pose_detector=True):
     global lock
     global pose,detector,options,base_options,POSEDETECTOR_BODY_PARTS
     global degrees_nose_slope_max, degrees_shoulder_slope_max,degrees_nose_slope_min,normalized_z_limit
     xy_coordinate_positions={}
+    positions={}
     
     with lock:
         if (RUN_CV_SELFIE_SEGMENTER==True):
@@ -155,31 +156,54 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
             # imgOut = np.where(category_mask_condition,  bg_image,image_data)
         # cv2.imshow("BG Masked",imgOut)
     with lock:
-        pose=detector.findPose(img,draw=False)
+        pose=detector.findPose(rembg_image,draw=False)
+    
+        
+    
+    with lock:
+        pose=detector.findPose(rembg_image,draw=False)
     
         
     
     lmList, bboxInfo = detector.findPosition(pose,draw=False, bboxWithHands=False)
     # pp.pprint("Results from lmList:")
     # pp.pprint(lmList)
-    positions = {
-    "left_eye" : lmList[3][:2],
-    "right_eye": lmList[6][:2],
-    "nose" : lmList[0][:2],
-    "left_shoulder" : lmList[11][:2],
-    "right_shoulder" : lmList[12][:2],
-    "left_ear":lmList[7][:2],
-    "right_ear":lmList[8][:2],
-    }
+    if (use_cv_pose_detector==True): 
+        print("Using CVZONE pose detector",file=sys.stderr, flush=True)
+        positions.update({
+        "left_eye" : lmList[3][:2],
+        "right_eye": lmList[6][:2],
+        "nose" : lmList[0][:2],
+        "left_shoulder" : lmList[11][:2],
+        "right_shoulder" : lmList[12][:2],
+        "left_ear":lmList[7][:2],
+        "right_ear":lmList[8][:2],
+        })
+    else:
+        positions.update ({
+        "op_left_eye" : lmList[3][:2],
+        "op_right_eye": lmList[6][:2],
+        "op_nose" : lmList[0][:2],
+        "op_left_shoulder" : lmList[11][:2],
+        "op_right_shoulder" : lmList[12][:2],
+        "op_left_ear":lmList[7][:2],
+        "op_right_ear":lmList[8][:2],
+        "op_thorax_midpoint":[round((lmList[11][0]+lmList[12][0])/2),round((lmList[11][1]+lmList[12][1])/2)]
+        })
+           
+   
+        
     #we get normalized z depth of shoulders too for reference, we use original img here
     #image without background is better able to detect z depth
     with PoseLandmarker.create_from_options(mp_options) as landmarker:
         rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image)
         image_height, image_width, _ = rgb_image.shape
-        pose_landmarker_result = landmarker.detect(mp_image)
+        with lock:
+            pose_landmarker_result = landmarker.detect(mp_image)
         # print(pose_landmarker_result,file=sys.stderr, flush=True)
         mp_pose_landmark_list={}
+        mp_pose_image_landmark_list={}
         for index, elem in enumerate(POSEDETECTOR_BODY_PARTS):
                 x=round(pose_landmarker_result.pose_landmarks[0][index].x*image_width)
                 y=round(pose_landmarker_result.pose_landmarks[0][index].y*image_height)
@@ -187,10 +211,35 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
                 # print(elem,":",pose_landmarker_result.pose_landmarks[0][index])
                 mp_pose_landmark_list[elem]=[]
                 mp_pose_landmark_list[elem]=[x,y,z]
+                mp_pose_image_landmark_list[elem]=[x,y]
         positions.update({
             "mp_left_right_shoulder_z_distance":mp_pose_landmark_list["left shoulder"][2]-mp_pose_landmark_list["right shoulder"][2],
             })
+       
         
+        
+        if (use_cv_pose_detector==False): 
+            print("Using Mediapipe pose detector",file=sys.stderr, flush=True)
+            positions.update({
+            "left_eye" : mp_pose_image_landmark_list["left eye"],
+            "right_eye": mp_pose_image_landmark_list["right eye"],
+            "nose" : mp_pose_image_landmark_list["nose"],
+            "left_shoulder" : mp_pose_image_landmark_list["left shoulder"],
+            "right_shoulder" : mp_pose_image_landmark_list["right shoulder"],
+            "left_ear":mp_pose_image_landmark_list["left ear"],
+            "right_ear":mp_pose_image_landmark_list["right ear"],
+            })
+        else:
+            positions.update({
+            "op_left_eye" : mp_pose_image_landmark_list["left eye"],
+            "op_right_eye": mp_pose_image_landmark_list["right eye"],
+            "op_nose" : mp_pose_image_landmark_list["nose"],
+            "op_left_shoulder" : mp_pose_image_landmark_list["left shoulder"],
+            "op_right_shoulder" : mp_pose_image_landmark_list["right shoulder"],
+            "op_left_ear":mp_pose_image_landmark_list["left ear"],
+            "op_right_ear":mp_pose_image_landmark_list["right ear"],
+            "op_thorax_midpoint":[round((mp_pose_image_landmark_list["left shoulder"][0]+mp_pose_image_landmark_list["right shoulder"][0])/2),round((mp_pose_image_landmark_list["left shoulder"][1]+mp_pose_image_landmark_list["right shoulder"][1])/2)]
+            })
         
         # if we need to ensure shoulders are aligned in z plane - we return error if they are not aligned
         if (force_shoulder_z_alignment==True and (abs(positions["mp_left_right_shoulder_z_distance"])>0.265)):

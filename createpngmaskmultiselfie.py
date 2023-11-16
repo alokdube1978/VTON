@@ -17,6 +17,7 @@ from mediapipe.python._framework_bindings import image_frame
 from mediapipe.tasks.python import vision
 from mediapipe import tasks
 from cvzone.ClassificationModule import Classifier
+USE_CV_POSE_DETECTOR=False
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 model_path="./Models/selfie_multiclass_256x256.tflite"
@@ -242,8 +243,8 @@ def get_jewellery_image_mask(img):
     return (masked_image)
 
 
-def get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False):
-    human_image,face_position=extract_face.getSelfieImageandFaceLandMarkPoints(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment)
+def get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False,use_cv_pose_detector=True):
+    human_image,face_position=extract_face.getSelfieImageandFaceLandMarkPoints(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment,use_cv_pose_detector)
     human_image_tf = mp.Image(image_format=mp.ImageFormat.SRGB, data=human_image)
     with vision.ImageSegmenter.create_from_options(options) as segmenter:
         segmentation_result = segmenter.segment(human_image_tf)
@@ -385,11 +386,11 @@ def overlay_jewellery_on_face(jewellery_position,face_position,human_image,persp
     
     
     
-def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False):
+def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False,use_cv_pose_detector=True):
     # human_image=cv2.imread(human_path,cv2.IMREAD_UNCHANGED)
     global interested_points
     try:
-        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment)
+        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment,use_cv_pose_detector)
         human_image_copy=human_image.copy()
     except:
         raise Exception("Please ensure your shoulders are horizontal and your face is vertical and the upper thorax is facing the camera with proper lighting")
@@ -422,10 +423,10 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
     
     
 
-def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False):
+def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False,use_cv_pose_detector=True):
     global interested_points
     try:
-        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment)
+        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment,use_cv_pose_detector)
         human_image_copy=human_image.copy()
     except:
         raise Exception("Please ensure your shoulders are horizontal and your face is vertical and they are both facing the camera")
