@@ -393,7 +393,7 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
         human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment,use_cv_pose_detector)
         human_image_copy=human_image.copy()
     except:
-        raise Exception("Please ensure your shoulders are horizontal and your face is vertical and the upper thorax is facing the camera with proper lighting")
+        raise Exception("Please ensure your shoulders are horizontal and your face is vertical and the upper thorax and face is facing the camera with proper lighting")
         
     try:    
         perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug=True)
