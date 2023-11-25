@@ -18,8 +18,11 @@ from mediapipe import tasks
 degrees_shoulder_slope_max=3.5
 degrees_nose_slope_max=100
 degrees_nose_slope_min=80
-normalized_shoulders_z_limit=0.23
-normalized_ears_z_limit=0.11
+normalized_shoulders_z_limit=0.27
+normalized_ears_z_limit=0.2
+horizontal_ratio=55
+vertical_ratio=40
+max_horizontal_vertical_ratio=1.15
 
 POSEDETECTOR_BODY_PARTS=["nose","left eye (inner)","left eye","left eye (outer)","right eye (inner)",
 "right eye","right eye (outer)","left ear","right ear","mouth (left)","mouth (right)",
@@ -128,7 +131,7 @@ def get_midpoint(p1,p2):
 
 def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False,use_cv_pose_detector=True):
     global lock
-    global pose,detector,options,base_options,POSEDETECTOR_BODY_PARTS
+    global pose,detector,options,base_options,POSEDETECTOR_BODY_PARTS,horizontal_ratio, vertical_ratio
     global degrees_nose_slope_max, degrees_shoulder_slope_max,degrees_nose_slope_min,normalized_shoulders_z_limit,normalized_ears_z_limit
     xy_coordinate_positions={}
     positions={}
@@ -195,7 +198,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
    
         
     #we get normalized z depth of shoulders too for reference, we use original img here
-    #image without background is better able to detect z depth
+    #image with background is better able to detect z depth
     with PoseLandmarker.create_from_options(mp_options) as landmarker:
         rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_image)
@@ -242,17 +245,18 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
             "op_right_ear":mp_pose_image_landmark_list["right ear"],
             "op_thorax_midpoint":[round((mp_pose_image_landmark_list["left shoulder"][0]+mp_pose_image_landmark_list["right shoulder"][0])/2),round((mp_pose_image_landmark_list["left shoulder"][1]+mp_pose_image_landmark_list["right shoulder"][1])/2)]
             })
-        
+        print("Positions",file=sys.stderr, flush=True)
+        print(positions,file=sys.stderr, flush=True)
         # if we need to ensure shoulders are aligned in z plane - we return error if they are not aligned
         if (force_shoulder_z_alignment==True and (abs(positions["mp_left_right_shoulder_z_distance"])>normalized_shoulders_z_limit)):
-            print("Error!! Z values of left and right shoulder points not aligned")
+            print("Error!! Z values of left and right shoulder points not aligned:",file=sys.stderr, flush=True)
+            print(positions["mp_left_right_shoulder_z_distance"],file=sys.stderr, flush=True)
             raise Exception('force_shoulder_z_alignment')
         if (force_shoulder_z_alignment==True and (abs(positions["mp_left_right_ear_z_distance"])>normalized_ears_z_limit)):
-            print("Error!! Z values of left and right Ear points not aligned:",abs(positions["mp_left_right_ear_z_distance"]))
+            print("Error!! Z values of left and right Ear points not aligned:",abs(positions["mp_left_right_ear_z_distance"],file=sys.stderr, flush=True))
             raise Exception('force_face_z_alignment')
         
-    print("Positions",file=sys.stderr, flush=True)
-    print(positions,file=sys.stderr, flush=True)
+    
     xy_coordinate_positions=get_xy_coordinate_positions(positions)
     xy_coordinate_positions["thorax_top"]=[0,0]
     xy_coordinate_positions["thorax_bottom"]=[0,0]
@@ -270,32 +274,48 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     xy_coordinate_positions["shoulder_points_distance"]=shoulder_points_distance
     
     xy_coordinate_positions["face_nose_thorax_distance"]=face_nose_thorax_distance
+    nose_slope,nose_intercept=slope_intercept(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
+    
+    print("XY Positions",file=sys.stderr, flush=True)
+    print(xy_coordinate_positions,file=sys.stderr, flush=True)
+    
+    # if (round((xy_coordinate_positions["shoulder_points_distance"]/2)<round(0.95*xy_coordinate_positions["face_nose_thorax_distance"]))
+        # and ((abs(math.degrees(math.atan(nose_slope)))>=degrees_nose_slope_min and abs(math.degrees(math.atan(nose_slope))) <=degrees_nose_slope_max ))):
+        # print ("Too narrow on shoulder points,setting to nose_thorax",file=sys.stderr, flush=True)
+        # xy_coordinate_positions["shoulder_points_distance"]=round(2*face_nose_thorax_distance)
     
     if use_different_horizontal_vertical_scale==True:
         
-        xy_coordinate_positions["horizontal_reduced_circle_radius"]=round(xy_coordinate_positions["shoulder_points_distance"]/2* 40/100)
-        xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
+        xy_coordinate_positions["horizontal_reduced_circle_radius"]=round(xy_coordinate_positions["shoulder_points_distance"]/2* horizontal_ratio/100)
+        xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * vertical_ratio/100)
     else:
-        xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
+        xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * vertical_ratio/100)
         xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
     
     # if we are too wide on the vertical scale or horizontal scale- we tie it to horizontal scale
-    if ((xy_coordinate_positions["vertical_reduced_circle_radius"]/xy_coordinate_positions["horizontal_reduced_circle_radius"])>1.23
-        or (xy_coordinate_positions["horizontal_reduced_circle_radius"]/xy_coordinate_positions["vertical_reduced_circle_radius"])>1.23
+    if ((xy_coordinate_positions["vertical_reduced_circle_radius"]/xy_coordinate_positions["horizontal_reduced_circle_radius"])>max_horizontal_vertical_ratio
+        or (xy_coordinate_positions["horizontal_reduced_circle_radius"]/xy_coordinate_positions["vertical_reduced_circle_radius"])>max_horizontal_vertical_ratio
         ):
-        xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
-        xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
+        print("Too wide on ratio",file=sys.stderr, flush=True)
+        print("Vertical Radius:"+str(xy_coordinate_positions["vertical_reduced_circle_radius"]),file=sys.stderr, flush=True)
+        print("Horizontal Radius:"+str(xy_coordinate_positions["horizontal_reduced_circle_radius"]),file=sys.stderr, flush=True)
+        xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * vertical_ratio/100)
+        xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"] * max_horizontal_vertical_ratio
     
     vertical_reduced_circle_radius=xy_coordinate_positions["vertical_reduced_circle_radius"]
     horizontal_reduced_circle_radius=xy_coordinate_positions["horizontal_reduced_circle_radius"]
     
-    xy_coordinate_positions["reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * 40/100)
+    xy_coordinate_positions["reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * vertical_ratio/100)
     reduced_circle_radius=xy_coordinate_positions["reduced_circle_radius"]
     xy_coordinate_positions["thorax_top_bottom_distance"]=xy_coordinate_positions["horizontal_reduced_circle_radius"]*2
     nose_slope,nose_intercept=slope_intercept(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
     shoulder_slope,shoulder_intercept=slope_intercept(xy_coordinate_positions["left_shoulder"],xy_coordinate_positions["right_shoulder"])
+    eye_slope,eye_intercept=slope_intercept(xy_coordinate_positions["left_eye"],xy_coordinate_positions["right_eye"])
+    ear_slope,ear_intercept=slope_intercept(xy_coordinate_positions["left_ear"],xy_coordinate_positions["right_ear"])
     xy_coordinate_positions["nose_slope"]=nose_slope
     xy_coordinate_positions["shoulder_slope"]=shoulder_slope
+    xy_coordinate_positions["eye_slope"]=eye_slope
+    xy_coordinate_positions["ear_slope"]=ear_slope
     
     
     
@@ -307,28 +327,43 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     print(math.degrees(math.atan(xy_coordinate_positions["nose_slope"])),file=sys.stderr, flush=True)
     print ("Original Shoulder Slope",file=sys.stderr, flush=True)
     print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
+    print ("Original Eye Slope",file=sys.stderr, flush=True)
+    print(math.degrees(math.atan(xy_coordinate_positions["eye_slope"])),file=sys.stderr, flush=True)
+    print ("Original Ear Slope",file=sys.stderr, flush=True)
+    print(math.degrees(math.atan(xy_coordinate_positions["ear_slope"])),file=sys.stderr, flush=True)
     
         
     orig_nose_slope=xy_coordinate_positions["nose_slope"]
     orig_shoulder_slope=xy_coordinate_positions["shoulder_slope"]  
     
     
-    if ((abs(math.degrees(math.atan(nose_slope)))>=degrees_nose_slope_min and abs(math.degrees(math.atan(nose_slope))) <=degrees_nose_slope_max ) and (abs(math.degrees(math.atan(shoulder_slope)))>degrees_shoulder_slope_max)) :
+    
+    
+    if (((abs(math.degrees(math.atan(nose_slope)))>=degrees_nose_slope_min and abs(math.degrees(math.atan(nose_slope))) <=degrees_nose_slope_max ) 
+        and 
+        (
+          abs(math.degrees(math.atan(shoulder_slope)))>degrees_shoulder_slope_max
+                or ((abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max)
+                        and ((xy_coordinate_positions["ear_slope"]>0 and xy_coordinate_positions["shoulder_slope"]<0) or (xy_coordinate_positions["ear_slope"]<0 and xy_coordinate_positions["shoulder_slope"]>0))
+                    )
+         )
+         )
+        ):
        print ("Trying to Reset shoulder slope as nose slope is vertical",file=sys.stderr, flush=True)
        if ((math.atan(nose_slope)>=0) and (math.atan(nose_slope)<=90)):
             shoulder_slope=math.tan(math.radians(math.degrees(abs(math.atan(nose_slope)))-90))
        else:
            shoulder_slope=math.tan(math.radians(90-math.degrees(abs(math.atan(nose_slope)))))
            
-       if (abs(shoulder_slope)<abs(orig_shoulder_slope)):    
+       if (abs(shoulder_slope)<abs(orig_shoulder_slope) or 1==1):    
            xy_coordinate_positions["shoulder_slope"]=shoulder_slope
            print("Reset Shoulder slope",file=sys.stderr, flush=True)
            print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
        else:
            xy_coordinate_positions["shoulder_slope"]=orig_shoulder_slope
  
-    elif (((abs(math.degrees(math.atan(nose_slope)))<degrees_nose_slope_min or abs(math.degrees(math.atan(nose_slope))) >degrees_nose_slope_max )) and (abs(math.degrees(math.atan(shoulder_slope)))<degrees_shoulder_slope_max)) :
-       print ("Trying to Reset nose slope as shoulder slope is horizontal",file=sys.stderr, flush=True)
+    elif (((abs(math.degrees(math.atan(nose_slope)))<degrees_nose_slope_min or abs(math.degrees(math.atan(nose_slope))) >degrees_nose_slope_max )) and (abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max and abs(math.degrees(math.atan(ear_slope)))<=degrees_shoulder_slope_max)) :
+       print ("Trying to Reset nose slope as shoulder and ear slope is horizontal",file=sys.stderr, flush=True)
        if ((math.atan(nose_slope)>=0) and (math.atan(nose_slope)<=90)):
            nose_slope=math.tan(math.radians(math.degrees(math.atan(shoulder_slope)) - 90))
        else:
@@ -341,6 +376,26 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
        else:
            xy_coordinate_positions["nose_slope"]=orig_nose_slope
     
+    elif (((abs(math.degrees(math.atan(nose_slope)))<degrees_nose_slope_min or abs(math.degrees(math.atan(nose_slope))) >degrees_nose_slope_max )) 
+        # and (
+        # abs(math.degrees(math.atan(ear_slope)))<degrees_shoulder_slope_max and 
+        # abs(math.degrees(math.atan(shoulder_slope)))>degrees_shoulder_slope_max)
+        ) :
+       print ("Following ear slope as shoulder slope and nose slope are out of bounds",file=sys.stderr, flush=True)
+       shoulder_slope=ear_slope
+       xy_coordinate_positions["shoulder_slope"]=ear_slope
+           
+       # if (abs(shoulder_slope)<abs(orig_shoulder_slope) or 1==1):    
+           # xy_coordinate_positions["shoulder_slope"]=shoulder_slope
+           # print("Reset Shoulder slope",file=sys.stderr, flush=True)
+           # print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
+       # else:
+           # xy_coordinate_positions["shoulder_slope"]=orig_shoulder_slope
+    
+    
+    
+    shoulder_slope=xy_coordinate_positions["shoulder_slope"]
+    nose_slope=xy_coordinate_positions["nose_slope"]
     # print("----shoulder slope,intercept----",file=sys.stderr, flush=True)
     # print (shoulder_slope,shoulder_intercept,file=sys.stderr, flush=True)
     
@@ -386,8 +441,8 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     xy_coordinate_positions["thorax_bottom"][0]=round(xy_coordinate_positions["thorax_midpoint"][0]+vertical_reduced_circle_radius*math.cos(-1*math.pi/2+math.atan(shoulder_slope)))
     xy_coordinate_positions["thorax_bottom"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+vertical_reduced_circle_radius*math.sin(-1*math.pi/2+math.atan(shoulder_slope)))
     
-    print ("Degrees shoulder:",math.degrees(abs(math.atan(xy_coordinate_positions["shoulder_slope"])))," Degrees nose:",math.degrees(abs(math.atan(xy_coordinate_positions["nose_slope"]))),file=sys.stderr, flush=True)
-    if (math.degrees(abs(math.atan(xy_coordinate_positions["shoulder_slope"])))>degrees_shoulder_slope_max*4 or math.degrees(abs(math.atan(xy_coordinate_positions["nose_slope"])))<60):
+    print ("Degrees shoulder:",math.degrees((math.atan(xy_coordinate_positions["shoulder_slope"])))," Degrees nose:",math.degrees((math.atan(xy_coordinate_positions["nose_slope"]))),file=sys.stderr, flush=True)
+    if (math.degrees(abs(math.atan(xy_coordinate_positions["shoulder_slope"])))>degrees_shoulder_slope_max*6 or math.degrees(abs(math.atan(xy_coordinate_positions["nose_slope"])))<60):
         print("Error!!shoulder or nose slope needs correction- shoulder:",math.degrees(abs(math.atan(xy_coordinate_positions["shoulder_slope"]))),"nose:",math.degrees(abs(math.atan(xy_coordinate_positions["nose_slope"]))),file=sys.stderr, flush=True)
         raise Exception('shoulder or nose slope needs correction',math.degrees(abs(math.atan(xy_coordinate_positions["shoulder_slope"]))),math.degrees(abs(math.atan(xy_coordinate_positions["nose_slope"]))))
     
