@@ -20,8 +20,8 @@ pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 USE_CV_POSE_DETECTOR=False
 model_path="D:\\VTON\\Models\\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\VTON\\overlay\\human_image10.jpeg'
-input_path = "D:\\VTON\\overlay\\necklace2.jpg"
+human_path = 'D:\\VTON\\overlay\\human_image108.jpg'
+input_path = "D:\\VTON\\overlay\\necklace8.png"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
 model="isnet-general-use"
@@ -550,13 +550,13 @@ def main():
     # }
 
     # # #necklace2.jpg
-    jewellery_position={
-    'thorax_top':[184,155],
-    'thorax_bottom':[184,393],
-    'thorax_midpoint':[0,0],
-    'left_shoulder_pivot':[306,304],
-    'right_shoulder_pivot':[84,304]
-    }
+    # jewellery_position={
+    # 'thorax_top':[175,140],
+    # 'thorax_bottom':[175,380],
+    # 'thorax_midpoint':[0,0],
+    # 'left_shoulder_pivot':[306,304],
+    # 'right_shoulder_pivot':[84,304]
+    # }
 
 
     # #necklace3.jpg
@@ -608,13 +608,13 @@ def main():
     # }
 
     ##necklace8.png
-    # jewellery_position={
-    # 'thorax_top':[180,90],
-    # 'thorax_bottom':[180,275],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
+    jewellery_position={
+    'thorax_top':[270,150],
+    'thorax_bottom':[270,500],
+    'thorax_midpoint':[0,0],
+    'left_shoulder_pivot':[385,392],
+    'right_shoulder_pivot':[25,392]
+    }
 
     # ##necklace9.png
     # jewellery_position={
@@ -682,7 +682,7 @@ def main():
         
         cv2.ellipse(human_image,center,axes,-1*math.degrees(face_position["shoulder_slope"]),0,360,(255,0,0),1)
         
-       
+    cv2.imshow("Detected Points",human_image)  
 
     cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
     cv2.imshow("perspective_masked_image",perspective_masked_image)
