@@ -15,7 +15,7 @@ from mediapipe.tasks.python import vision
 from mediapipe import tasks
 
 
-degrees_shoulder_slope_max=3.5
+degrees_shoulder_slope_max=4
 degrees_nose_slope_max=100
 degrees_nose_slope_min=80
 normalized_shoulders_z_limit=0.27
