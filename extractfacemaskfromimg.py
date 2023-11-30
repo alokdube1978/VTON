@@ -374,7 +374,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
        else:
            xy_coordinate_positions["shoulder_slope"]=orig_shoulder_slope
  
-    elif (((abs(math.degrees(math.atan(nose_slope)))<degrees_nose_slope_min or abs(math.degrees(math.atan(nose_slope))) >degrees_nose_slope_max )) and (abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max)) :
+    elif (((abs(math.degrees(math.atan(nose_slope)))<degrees_nose_slope_min or abs(math.degrees(math.atan(nose_slope))) >degrees_nose_slope_max )) and (abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max and abs(math.degrees(math.atan(ear_slope)))<=degrees_shoulder_slope_max)) :
        print ("Trying to Reset nose slope as shoulder and ear slope is horizontal",file=sys.stderr, flush=True)
        if ((math.atan(nose_slope)>=0) and (math.atan(nose_slope)<=90)):
            nose_slope=math.tan(math.radians(math.degrees(math.atan(shoulder_slope)) - 90))
