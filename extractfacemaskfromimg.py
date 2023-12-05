@@ -368,7 +368,6 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
            xy_coordinate_positions["nose_slope"]=orig_nose_slope
            
     elif ((abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max ) 
-        #and (abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max and abs(math.degrees(math.atan(ear_slope)))<=degrees_shoulder_slope_max)
         and (xy_coordinate_positions["shoulder_slope"]*xy_coordinate_positions["ear_slope"]<0)
         ) :
         
