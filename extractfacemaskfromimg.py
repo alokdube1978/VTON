@@ -394,7 +394,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
                    or (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)
                    and math.degrees(math.atan(shoulder_slope))<0)
                    ):
-                    print ("Following Nose slope and trying to Reset shoulder slope as shoulder slope is in limit but shoulder and ear have different inclines and nose slope out of limits but in same direction as shoulder",file=sys.stderr, flush=True)
+                    print ("Following Nose slope and trying to Reset shoulder slope as shoulder slope is in limit but shoulder and ear have different inclines and nose slope out of limits but different inclined as shoulder",file=sys.stderr, flush=True)
                     if (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)):
                         shoulder_slope=math.tan(math.radians(math.degrees(abs(math.atan(nose_slope)))-90))
                     else:
@@ -410,7 +410,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
                    
                    
                else:
-                   print ("Following Ear slope and trying to Reset shoulder slope as shoulder slope is in limit but shoulder and ear have different inclines but nose and shoulder have different directions and  nose slope out of limits",file=sys.stderr, flush=True)
+                   print ("Following Ear slope and trying to Reset shoulder slope as shoulder slope is in limit but shoulder and ear have different inclines but nose and shoulder have same incline and  nose slope out of limits",file=sys.stderr, flush=True)
                    shoulder_slope=ear_slope
                    xy_coordinate_positions["shoulder_slope"]=ear_slope
                    if (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)):
@@ -446,7 +446,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
          and (xy_coordinate_positions["ear_slope"]*xy_coordinate_positions["shoulder_slope"]<=0)
          )
         ):
-       print ("Following Nose slope and trying to Reset shoulder slope as nose slope is vertical and shoulder and ear are in different inclines",file=sys.stderr, flush=True)
+       print ("Following Nose slope and trying to Reset shoulder slope as nose slope is vertical and shoulder and ear are in different inclined",file=sys.stderr, flush=True)
        if (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)):
             shoulder_slope=math.tan(math.radians(math.degrees(abs(math.atan(nose_slope)))-90))
        else:
@@ -486,7 +486,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
                    or (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)
                    and math.degrees(math.atan(shoulder_slope))<0)
                    ):
-                    print ("Following Nose slope and trying to Reset shoudler slope as shoulder slope and nose slope are out of bounds and ear and shoulder slope in same inclines and shoulder and nose are in same directions",file=sys.stderr, flush=True)       
+                    print ("Following Nose slope and trying to Reset shoudler slope as shoulder slope and nose slope are out of bounds and ear and shoulder slope in same inclines and shoulder and nose are in opposite incline",file=sys.stderr, flush=True)       
                     if (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)):
                         shoulder_slope=math.tan(math.radians(math.degrees(abs(math.atan(nose_slope)))-90))
                     else:
@@ -500,7 +500,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
                         xy_coordinate_positions["shoulder_slope"]=orig_shoulder_slope
                         
         else:            
-           print ("Following ear slope and trying to Reset nose slope as shoulder slope and nose slope are out of bounds and ear and shoulder slope in same inclines but shoulder and nose are in different directions",file=sys.stderr, flush=True)
+           print ("Following ear slope and trying to Reset nose slope as shoulder slope and nose slope are out of bounds and ear and shoulder slope in same inclines but shoulder and nose are in same incline",file=sys.stderr, flush=True)
            shoulder_slope=ear_slope
            xy_coordinate_positions["shoulder_slope"]=ear_slope
            if (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)):
@@ -524,18 +524,39 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     elif (((abs(math.degrees(math.atan(nose_slope)))<degrees_nose_slope_min or abs(math.degrees(math.atan(nose_slope))) >degrees_nose_slope_max )
         and (xy_coordinate_positions["shoulder_slope"]*xy_coordinate_positions["ear_slope"]<=0)
         )) :
-           print ("Following nose slope and trying to Reset shoulder slope as shoulder slope and nose slope are out of bounds and ear and shoulder in different inclines",file=sys.stderr, flush=True)
-           if ((math.atan(nose_slope)>=0) and (math.atan(nose_slope)<=90)):
-            shoulder_slope=math.tan(math.radians(math.degrees(abs(math.atan(nose_slope)))-90))
+        if ( (math.degrees((math.atan(nose_slope))<0) 
+                   and math.degrees(math.atan(shoulder_slope))>=0)
+                   or (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)
+                   and math.degrees(math.atan(shoulder_slope))<0)
+                   ):
+                    print ("Following Nose slope and trying to Reset shoudler slope as shoulder slope and nose slope are out of bounds and ear and shoulder slope in different inclines and shoulder and nose are different inclined",file=sys.stderr, flush=True)       
+                    if (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)):
+                        shoulder_slope=math.tan(math.radians(math.degrees(abs(math.atan(nose_slope)))-90))
+                    else:
+                        shoulder_slope=math.tan(math.radians(90-math.degrees(abs(math.atan(nose_slope)))))
+                   
+                    if (abs(shoulder_slope)<abs(orig_shoulder_slope) or 1==1):    
+                        xy_coordinate_positions["shoulder_slope"]=shoulder_slope
+                        print("Reset Shoulder slope",file=sys.stderr, flush=True)
+                        print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
+                    else:
+                        xy_coordinate_positions["shoulder_slope"]=orig_shoulder_slope
+                        
+        else:            
+           print ("Following ear slope and trying to Reset nose slope as shoulder slope and nose slope are out of bounds and ear and shoulder slope in different inclines but shoulder and nose are same inclined",file=sys.stderr, flush=True)
+           shoulder_slope=ear_slope
+           xy_coordinate_positions["shoulder_slope"]=ear_slope
+           if (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)):
+               nose_slope=math.tan(math.radians(math.degrees(math.atan(shoulder_slope)) - 90))
            else:
-               shoulder_slope=math.tan(math.radians(90-math.degrees(abs(math.atan(nose_slope)))))
-               
-           if (abs(shoulder_slope)<abs(orig_shoulder_slope) or 1==1):    
-               xy_coordinate_positions["shoulder_slope"]=shoulder_slope
-               print("Reset Shoulder slope",file=sys.stderr, flush=True)
-               print(math.degrees(math.atan(xy_coordinate_positions["shoulder_slope"])),file=sys.stderr, flush=True)
+               nose_slope=math.tan(math.radians(90+ math.degrees(math.atan(shoulder_slope))))
+           
+           if ((90-abs(math.degrees(math.atan(nose_slope))))<(90-abs(math.degrees(math.atan(orig_nose_slope))))):
+                xy_coordinate_positions["nose_slope"]=nose_slope
+                print("Reset Nose slope",file=sys.stderr, flush=True)
+                print(math.degrees(math.atan(xy_coordinate_positions['nose_slope'])),file=sys.stderr, flush=True)
            else:
-               xy_coordinate_positions["shoulder_slope"]=orig_shoulder_slope
+               xy_coordinate_positions["nose_slope"]=orig_nose_slope
            
            
     shoulder_slope=xy_coordinate_positions["shoulder_slope"]
