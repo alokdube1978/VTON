@@ -402,7 +402,9 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     elif ((abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max ) 
         and (xy_coordinate_positions["shoulder_slope"]*xy_coordinate_positions["ear_slope"]<0)
         ) :
-       if (abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max and abs(math.degrees(math.atan(ear_slope)))<=degrees_shoulder_slope_max):
+       if (abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max and abs(math.degrees(math.atan(ear_slope)))<=degrees_shoulder_slope_max
+           and (xy_coordinate_positions["shoulder_slope"]*xy_coordinate_positions["ear_slope"]>0)
+           ):
            print ("Following Shoulder slope and trying to Reset nose slope as shoulder slope is in limit but shoulder and ear have different inclines and shoulder and ear slope in limits",file=sys.stderr, flush=True) 
            if (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)):
                nose_slope=math.tan(math.radians(math.degrees(math.atan(shoulder_slope)) - 90))
