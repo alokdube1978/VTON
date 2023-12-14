@@ -25,7 +25,7 @@ vertical_ratio=40
 max_horizontal_vertical_ratio=1.1
 shoulder_to_nose_eyes_ratio_max=9.4
 nose_thorax_to_nose_eyes_ratio_max=7.2
-nose_thorax_to_nose_eyes_ratio_min=nose_thorax_to_nose_eyes_ratio_max*0.4
+nose_thorax_to_nose_eyes_ratio_min=nose_thorax_to_nose_eyes_ratio_max*0.5
 
 
 POSEDETECTOR_BODY_PARTS=["nose","left eye (inner)","left eye","left eye (outer)","right eye (inner)",
@@ -284,6 +284,9 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     xy_coordinate_positions["eye_nose_distance"]=eye_nose_distance
     print("EyeNose Distance:"+str(eye_nose_distance),file=sys.stderr, flush=True)
     print("face_nose_thorax_distance Distance:"+str(face_nose_thorax_distance),file=sys.stderr, flush=True)
+    thorax_nose_to_eye_nose_ratio=xy_coordinate_positions["face_nose_thorax_distance"]/xy_coordinate_positions["eye_nose_distance"]
+    xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]=thorax_nose_to_eye_nose_ratio
+    print ("Thorax Nose to EyeNose Ratio:"+str(thorax_nose_to_eye_nose_ratio),file=sys.stderr, flush=True)
     
     if (xy_coordinate_positions["face_nose_thorax_distance"]>nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"]
         ):
@@ -292,7 +295,10 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         face_nose_thorax_distance=nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"]*.9
         xy_coordinate_positions["face_nose_thorax_distance"]=face_nose_thorax_distance
         print ("New Value:"+str(xy_coordinate_positions["face_nose_thorax_distance"]),file=sys.stderr, flush=True)
-    
+        thorax_nose_to_eye_nose_ratio=xy_coordinate_positions["face_nose_thorax_distance"]/xy_coordinate_positions["eye_nose_distance"]
+        xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]=thorax_nose_to_eye_nose_ratio
+        print ("New Thorax Nose to EyeNose Ratio:"+str(thorax_nose_to_eye_nose_ratio),file=sys.stderr, flush=True)
+        
     if (xy_coordinate_positions["face_nose_thorax_distance"]<nose_thorax_to_nose_eyes_ratio_min*xy_coordinate_positions["eye_nose_distance"]
         ):
         print("NoseThorax to EyeNose ratio under limit, reseting nose thorax distance:",file=sys.stderr, flush=True)
@@ -300,7 +306,10 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         face_nose_thorax_distance=nose_thorax_to_nose_eyes_ratio_min*xy_coordinate_positions["eye_nose_distance"]
         xy_coordinate_positions["face_nose_thorax_distance"]=face_nose_thorax_distance
         print ("New Value:"+str(xy_coordinate_positions["face_nose_thorax_distance"]),file=sys.stderr, flush=True)
-    
+        thorax_nose_to_eye_nose_ratio=xy_coordinate_positions["face_nose_thorax_distance"]/xy_coordinate_positions["eye_nose_distance"]
+        xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]=thorax_nose_to_eye_nose_ratio
+        print ("New Thorax Nose to EyeNose Ratio:"+str(thorax_nose_to_eye_nose_ratio),file=sys.stderr, flush=True)
+        
     nose_slope,nose_intercept=slope_intercept(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
     
     shoulder_to_nose_eyes_ratio=xy_coordinate_positions["shoulder_points_distance"]/xy_coordinate_positions["eye_nose_distance"]
