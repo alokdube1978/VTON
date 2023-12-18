@@ -64,9 +64,15 @@ Sample Javascript Code params for usage:
         });
 
 ====Actual overlay on human image====
+
+
 The "final Image" - to overlay Jewellery on Human Image is defined at:
+
 http://vton.embitel.xyz/overlayimage
+
 Sample code for actual overlay:
+
+
     points['thorax_top_x'] = X_thorax_top;
     points['thorax_top_y'] = Y_thorax_top;
     points['thorax_bottom_x'] = X_thorax_bottom;
