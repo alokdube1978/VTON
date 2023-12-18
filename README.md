@@ -1,4 +1,7 @@
+====Mechanism - see VTON-Final PPTx to get an idea of the mechanism used to superimpose necklaces===
+
 ===Installation Instructions (API based usage explained furtner below)===
+
 This SECTION is for installing the server on a new node - and not for API based usage
 
 Run pip install -r requirements.txt to get all dependencies
