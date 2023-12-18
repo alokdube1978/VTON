@@ -38,6 +38,9 @@ The "Preview Image" - to check if Jewellery thorax top and bottom are properly d
 http://vton.embitel.xyz/preview
 
 Sample Javascript Code params for usage:
+
+
+
     points['thorax_top_x'] = X_thorax_top;
     points['thorax_top_y'] = Y_thorax_top;
     points['thorax_bottom_x'] = X_thorax_bottom;
