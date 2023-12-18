@@ -24,11 +24,17 @@ Runs flask on port 80, please ensure it runs with sudo or change port in functio
 
  
 ===API based usage===
+
 API based usage:
+
 Note that all APIs are POST based - 
+
 the GET methods on the APIs only return output on stock sample images - as placeholder
+
 The APIs are hosted on vton.embitel.xyz
+
 The "Preview Image" - to check if Jewellery thorax top and bottom are properly defined is at:
+
 http://vton.embitel.xyz/preview
 
 Sample Javascript Code params for usage:
