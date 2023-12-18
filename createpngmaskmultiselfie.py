@@ -20,7 +20,7 @@ pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 USE_CV_POSE_DETECTOR=False
 model_path="D:\\VTON\\Models\\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\VTON\\overlay\\human_image102.jpg'
+human_path = 'D:\\VTON\\overlay\\human_image84.jpg'
 input_path = "D:\\VTON\\overlay\\necklace8.png"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
@@ -562,7 +562,7 @@ def main():
     # #necklace3.jpg
     # jewellery_position={
     # 'thorax_top':[203,307],
-    # 'thorax_bottom':[203,481],
+    # 'thorax_bottom':[203,501],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
@@ -609,8 +609,8 @@ def main():
 
     ##necklace8.png
     jewellery_position={
-    'thorax_top':[270,150],
-    'thorax_bottom':[270,500],
+    'thorax_top':[270,120],
+    'thorax_bottom':[270,450],
     'thorax_midpoint':[0,0],
     'left_shoulder_pivot':[385,392],
     'right_shoulder_pivot':[25,392]
