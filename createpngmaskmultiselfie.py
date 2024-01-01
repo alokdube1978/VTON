@@ -57,7 +57,8 @@ def detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_resu
     condition_hair = np.stack((segmentation_result.confidence_masks[1].numpy_view(),) * 3, axis=-1) > 0.2
     condition_background = np.stack((segmentation_result.confidence_masks[0].numpy_view(),) * 3, axis=-1) > 0.2
     condition_face_skin=np.stack((segmentation_result.confidence_masks[3].numpy_view(),) * 3, axis=-1) > 0.2
-    combined_condition=(condition_hair| condition_background| condition_face_skin) 
+    condition_others=np.stack((segmentation_result.confidence_masks[5].numpy_view(),) * 3, axis=-1) > 0.2
+    combined_condition=(condition_hair| condition_background| condition_face_skin|condition_others) 
     output_combined_image=np.where(combined_condition,human_image_copy, imgOverlay)
     return output_combined_image
      
