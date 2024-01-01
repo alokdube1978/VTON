@@ -27,7 +27,7 @@ BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
 model="isnet-general-use"
 session=new_session(model)
-interested_points=["thorax_top","thorax_bottom","thorax_midpoint","right_shoulder_pivot","left_shoulder_pivot","left_shoulder","right_shoulder","nose"]
+interested_points=["thorax_top","thorax_bottom","thorax_midpoint","right_shoulder_pivot","left_shoulder_pivot","left_shoulder","right_shoulder","nose","eye_midpoint"]
 #mediapipe initialization
 BaseOptions = mp.tasks.BaseOptions
 ImageSegmenter = mp.tasks.vision.ImageSegmenter
