@@ -229,8 +229,8 @@ def overlayimage():
         ## For exmaple, if using necklace11, use thorax_top and thorax_bottom from necklace7 above
         #necklace11
         jewellery_position={
-            'thorax_top':[180,180],
-            'thorax_bottom':[180,357]
+        'thorax_top':[180,150],
+        'thorax_bottom':[180,430],
         }
         jewellery_image=cv2.imread("./overlay/necklace11.png",cv2.IMREAD_UNCHANGED)
         human_image=cv2.imread("./overlay/human_image21.jpg",cv2.IMREAD_UNCHANGED)
@@ -358,8 +358,8 @@ def preview():
     else:
         #necklace11.png
         jewellery_position={
-                'thorax_top':[180,180],
-                'thorax_bottom':[180,357]
+            'thorax_top':[180,150],
+            'thorax_bottom':[180,430],
             }
         jewellery_image=cv2.imread("./overlay/necklace11.png",cv2.IMREAD_UNCHANGED)
     
