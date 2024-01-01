@@ -321,10 +321,17 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         ):
         print("NoseThorax to EyeNose ratio over limit, reseting nose thorax distance:",file=sys.stderr, flush=True)
         print ("Old Value:"+str(xy_coordinate_positions["face_nose_thorax_distance"]),file=sys.stderr, flush=True)
+        # if (xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]>=1.75*nose_thorax_to_nose_eyes_ratio_max):
+            # print("NoseThorax to EyeNose ratio over 1.75 limit",file=sys.stderr, flush=True)
+            # # face_nose_thorax_distance=0.9*1.5*nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"]
+            # xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(0.8*1.75*nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
+            # thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
+        
+        # el
         if (xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]>=1.5*nose_thorax_to_nose_eyes_ratio_max):
             print("NoseThorax to EyeNose ratio over 1.5 limit",file=sys.stderr, flush=True)
             # face_nose_thorax_distance=0.9*1.5*nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"]
-            xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(0.95*1.5*nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
+            xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(1.5*nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
             thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
             
             
@@ -342,8 +349,16 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
             thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
             face_nose_thorax_distance=math.dist(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
         
+        elif (xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]>=1.09*nose_thorax_to_nose_eyes_ratio_max):
+            print("NoseThorax to EyeNose ratio less than 1.15 and over 1.05 limit",file=sys.stderr, flush=True)
+            # face_nose_thorax_distance=0.95*1.25*nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"]
+            xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(1.1*nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
+            thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
+            face_nose_thorax_distance=math.dist(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
+        
+        
         else:
-            print("NoseThorax to EyeNose ratio less than 1.15 limit",file=sys.stderr, flush=True)
+            print("NoseThorax to EyeNose ratio less than 1.05 limit",file=sys.stderr, flush=True)
             # face_nose_thorax_distance=nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"] 
             xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
             thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
