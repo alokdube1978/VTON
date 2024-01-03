@@ -53,12 +53,19 @@ options = vision.ImageSegmenterOptions(base_options=base_options,running_mode=Vi
 
     
 
-def detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_result):
+def detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_result,face_position):
     condition_hair = np.stack((segmentation_result.confidence_masks[1].numpy_view(),) * 3, axis=-1) > 0.2
     condition_background = np.stack((segmentation_result.confidence_masks[0].numpy_view(),) * 3, axis=-1) > 0.2
     condition_face_skin=np.stack((segmentation_result.confidence_masks[3].numpy_view(),) * 3, axis=-1) > 0.2
     condition_others=np.stack((segmentation_result.confidence_masks[5].numpy_view(),) * 3, axis=-1) > 0.2
-    combined_condition=(condition_hair| condition_background| condition_face_skin|condition_others) 
+    condition_bodyskin=np.stack((segmentation_result.confidence_masks[2].numpy_view(),) * 3, axis=-1) > 0.2
+    neck_skin_upper_limit_y=round(face_position["thorax_top"][1]-0.2*face_position["face_nose_thorax_distance"])
+    condition_bodyskin[neck_skin_upper_limit_y:,:,:]=False
+    
+    # print(face_position)
+    # sys.exit()
+    combined_condition=(condition_hair| condition_background| condition_face_skin|condition_others|condition_bodyskin) 
+    # combined_condition=(condition_hair| condition_background| condition_face_skin|condition_others)
     output_combined_image=np.where(combined_condition,human_image_copy, imgOverlay)
     return output_combined_image
      
@@ -381,7 +388,7 @@ def overlay_jewellery_on_face(jewellery_position,face_position,human_image,persp
     # cv2.imshow("IO",imgOverlay)
     # cv2.imshow("Perspective",perspective_masked_image)
 
-    imgOverlay=detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_result)
+    imgOverlay=detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_result,face_position)
     return imgOverlay
     
     
