@@ -59,7 +59,7 @@ def detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_resu
     condition_face_skin=np.stack((segmentation_result.confidence_masks[3].numpy_view(),) * 3, axis=-1) > 0.2
     condition_others=np.stack((segmentation_result.confidence_masks[5].numpy_view(),) * 3, axis=-1) > 0.2
     condition_bodyskin=np.stack((segmentation_result.confidence_masks[2].numpy_view(),) * 3, axis=-1) > 0.2
-    neck_skin_upper_limit_y=round(face_position["thorax_top"][1]-0.2*face_position["face_nose_thorax_distance"])
+    neck_skin_upper_limit_y=round(face_position["thorax_top"][1]-0.25*face_position["face_nose_thorax_distance"])
     condition_bodyskin[neck_skin_upper_limit_y:,:,:]=False
     
     # print(face_position)

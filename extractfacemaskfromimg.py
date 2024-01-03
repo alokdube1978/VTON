@@ -421,8 +421,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         
         # face_nose_thorax_distance=math.dist(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
         xy_coordinate_positions["face_nose_thorax_distance"]=face_nose_thorax_distance
-        xy_coordinate_positions["face_nose_thorax_distance"]=face_nose_thorax_distance
-        print ("New Value:"+str(xy_coordinate_positions["face_nose_thorax_distance"]),file=sys.stderr, flush=True)
+        print ("New face nose thorax distance :"+str(xy_coordinate_positions["face_nose_thorax_distance"]),file=sys.stderr, flush=True)
         thorax_nose_to_eye_nose_ratio=xy_coordinate_positions["face_nose_thorax_distance"]/xy_coordinate_positions["eye_nose_distance"]
         xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]=thorax_nose_to_eye_nose_ratio
         print ("New Thorax Nose to EyeNose Ratio:"+str(thorax_nose_to_eye_nose_ratio),file=sys.stderr, flush=True)
@@ -438,7 +437,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         print ("Original Nose Thorax to Eye Nose Ratio"+str(xy_coordinate_positions["orig_thorax_nose_to_eye_nose_ratio"]),file=sys.stderr,flush=True)
         xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(nose_thorax_to_nose_eyes_ratio_avg*xy_coordinate_positions["orig_thorax_nose_to_eye_nose_ratio"]/thorax_nose_to_eye_nose_ratio,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
         thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
-        face_nose_thorax_distance=math.dist(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
+        face_nose_thorax_distance=nose_thorax_to_nose_eyes_ratio_avg*xy_coordinate_positions["eye_nose_distance"]
         xy_coordinate_positions["face_nose_thorax_distance"]=face_nose_thorax_distance
         print ("New face nose thorax distance Value:"+str(xy_coordinate_positions["face_nose_thorax_distance"]),file=sys.stderr, flush=True)
         thorax_nose_to_eye_nose_ratio=xy_coordinate_positions["face_nose_thorax_distance"]/xy_coordinate_positions["eye_nose_distance"]
