@@ -14,7 +14,7 @@ from mediapipe.python._framework_bindings import image_frame
 from mediapipe.tasks.python import vision
 from mediapipe import tasks
 
-
+interested_points=["left_shoulder","right_shoulder","nose","left_eye","right_eye","left_ear","right_ear"]
 global_degrees_shoulder_slope_max=4
 global_degrees_nose_slope_max=100
 global_degrees_nose_slope_min=80
@@ -164,6 +164,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     global global_degrees_nose_slope_max, global_degrees_shoulder_slope_max,global_degrees_nose_slope_min,global_normalized_shoulders_z_limit,global_normalized_ears_z_limit
     xy_coordinate_positions={}
     positions={}
+    global interested_points
     global global_max_vertical_horizontal_ratio, global_max_horizontal_vertical_ratio,global_vertical_offet, global_horizontal_offset
     degrees_shoulder_slope_max=global_degrees_shoulder_slope_max
     degrees_nose_slope_max=global_degrees_nose_slope_max
@@ -185,6 +186,12 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     nose_thorax_to_nose_eyes_ratio_avg=global_nose_thorax_to_nose_eyes_ratio_avg
     ear_to_eye_nose_ratio_max=global_ear_to_eye_nose_ratio_max
     ear_to_eye_nose_ratio_min=global_ear_to_eye_nose_ratio_min
+    
+    shape=img.shape
+    min_img_x=0
+    min_img_y=0
+    max_img_x=shape[1]
+    max_img_y=shape[0]
     
     with lock:
         if (RUN_CV_SELFIE_SEGMENTER==True):
@@ -617,7 +624,12 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
                    and (math.degrees(math.atan(shoulder_slope))<0 or math.degrees(math.atan(ear_slope))<0))
                    ):
                    
-                   if (abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max):
+                   if (abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max
+                       # and ((math.degrees((math.atan(nose_slope))<0) and (math.degrees(math.atan(shoulder_slope))>=0)) 
+                            # or (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)
+                       # and (math.degrees(math.atan(shoulder_slope))<0))
+                        # )
+                       ):
                        print ("Following Shoulder slope and trying to Reset nose slope as shoulder slope is in limit but shoulder and ear have different inclines and nose slope out of limits but different inclined as shoulder and shoulder slope in limits",file=sys.stderr, flush=True)
                        if (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)):
                            nose_slope=math.tan(math.radians(math.degrees(math.atan(shoulder_slope)) - 90))
@@ -821,8 +833,8 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
                        )
               )
             and (
-            abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max
-            or abs(math.degrees(math.atan(ear_slope)))<=degrees_shoulder_slope_max
+            abs(math.degrees(math.atan(shoulder_slope)))>=degrees_shoulder_slope_max
+            or abs(math.degrees(math.atan(ear_slope)))>=degrees_shoulder_slope_max
             )
             ):
             print ("Following Temple slope and trying to Reset shoulder slope as Temple slope is vertical and shoulder and ear are in different inclined",file=sys.stderr, flush=True)
@@ -1175,6 +1187,15 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     print (xy_coordinate_positions,file=sys.stderr, flush=True)
     print ("Image postions",file=sys.stderr, flush=True)
     print(positions,file=sys.stderr, flush=True)
+    
+    for key in positions:
+      if key in interested_points:
+        if isinstance(positions[key], list):
+            if (positions[key][0]<min_img_x or positions[key][1]<min_img_y or positions[key][0]>max_img_x or positions[key][1]>max_img_y):
+                message="Error!:"+str(key)+" is out of image bounds : ["+str(positions[key][0])+","+str(positions[key][1])+"]"
+                print(message,file=sys.stderr, flush=True)
+                raise Exception(message)  
+    
     return imgOut,positions
 
 
