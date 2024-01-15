@@ -20,7 +20,7 @@ pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 USE_CV_POSE_DETECTOR=False
 model_path="D:\\VTON\\Models\\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\VTON\\overlay\\human_image20.jpg'
+human_path = 'D:\\VTON\\overlay\\human_image302.jpg'
 input_path = "D:\\VTON\\overlay\\necklace8.png"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
@@ -102,11 +102,19 @@ def resizeAndPad(img, size, padColor=255):
 
     
 
-def detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_result):
+def detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_result,face_position):
     condition_hair = np.stack((segmentation_result.confidence_masks[1].numpy_view(),) * 3, axis=-1) > 0.2
     condition_background = np.stack((segmentation_result.confidence_masks[0].numpy_view(),) * 3, axis=-1) > 0.2
     condition_face_skin=np.stack((segmentation_result.confidence_masks[3].numpy_view(),) * 3, axis=-1) > 0.2
-    combined_condition=(condition_hair| condition_background| condition_face_skin) 
+    condition_others=np.stack((segmentation_result.confidence_masks[5].numpy_view(),) * 3, axis=-1) > 0.2
+    condition_bodyskin=np.stack((segmentation_result.confidence_masks[2].numpy_view(),) * 3, axis=-1) > 0.2
+    neck_skin_upper_limit_y=round(face_position["thorax_top"][1]-0.3*face_position["face_nose_thorax_distance"])
+    condition_bodyskin[neck_skin_upper_limit_y:,:,:]=False
+    
+    # print(face_position)
+    # sys.exit()
+    combined_condition=(condition_hair| condition_background| condition_face_skin|condition_others|condition_bodyskin) 
+    # combined_condition=(condition_hair| condition_background| condition_face_skin|condition_others)
     output_combined_image=np.where(combined_condition,human_image_copy, imgOverlay)
     return output_combined_image
      
@@ -425,7 +433,7 @@ def overlay_jewellery_on_face(jewellery_position,face_position,human_image,persp
     cv2.imshow("Overlayed - non corrected",imgOverlay)
     # cv2.imshow("Perspective",perspective_masked_image)
 
-    imgOverlay=detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_result)
+    imgOverlay=detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_result,face_position)
     return imgOverlay
     
     
@@ -561,8 +569,8 @@ def main():
 
     # #necklace3.jpg
     # jewellery_position={
-    # 'thorax_top':[203,307],
-    # 'thorax_bottom':[203,501],
+    # 'thorax_top':[203,267],
+    # 'thorax_bottom':[203,461],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
@@ -591,8 +599,8 @@ def main():
 
     # ##necklace6.jpg
     # jewellery_position={
-    # 'thorax_top':[111,40],
-    # 'thorax_bottom':[111,240],
+    # 'thorax_top':[111,75],
+    # 'thorax_bottom':[111,225],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
@@ -600,8 +608,8 @@ def main():
 
     # ##necklace7.png
     # jewellery_position={
-    # 'thorax_top':[128,93],
-    # 'thorax_bottom':[128,293],
+    # 'thorax_top':[128,123],
+    # 'thorax_bottom':[128,323],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
@@ -610,7 +618,7 @@ def main():
     ##necklace8.png
     jewellery_position={
     'thorax_top':[270,120],
-    'thorax_bottom':[270,450],
+    'thorax_bottom':[270,470],
     'thorax_midpoint':[0,0],
     'left_shoulder_pivot':[385,392],
     'right_shoulder_pivot':[25,392]
@@ -636,13 +644,22 @@ def main():
 
     # # ##necklace11.png
     # jewellery_position={
-    # 'thorax_top':[180,180],
-    # 'thorax_bottom':[180,357],
+    # 'thorax_top':[180,150],
+    # 'thorax_bottom':[180,430],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
     # }
 
+
+    # # ##necklace12.png
+    # jewellery_position={
+    # 'thorax_top':[250,100],
+    # 'thorax_bottom':[250,450],
+    # 'thorax_midpoint':[0,0],
+    # 'left_shoulder_pivot':[385,392],
+    # 'right_shoulder_pivot':[25,392]
+    # }
 
     # ##tes.png
     # jewellery_position={
