@@ -582,7 +582,10 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         and (xy_coordinate_positions["shoulder_slope"]*xy_coordinate_positions["ear_slope"]<0)
         ) :
        if (abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max and abs(math.degrees(math.atan(ear_slope)))<=degrees_shoulder_slope_max
-           and ((xy_coordinate_positions["shoulder_slope"]*xy_coordinate_positions["ear_slope"]>=0))
+           and (
+           (xy_coordinate_positions["shoulder_slope"]*xy_coordinate_positions["ear_slope"]>=0)
+           or (xy_coordinate_positions["shoulder_slope"]*xy_coordinate_positions["ear_slope"]<0 and abs(math.degrees(math.atan(xy_coordinate_positions["ear_slope"])))<=degrees_shoulder_slope_max*0.8)
+           )
            ):
            print ("Following Shoulder slope and trying to Reset nose slope as shoulder slope is in limit but shoulder and ear have different inclines and shoulder and ear slope in limits",file=sys.stderr, flush=True) 
            if (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)):
@@ -646,7 +649,11 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
                    ):
                    
                    if (abs(math.degrees(math.atan(shoulder_slope)))<=degrees_shoulder_slope_max
-                        and ((xy_coordinate_positions["ear_slope"]*xy_coordinate_positions["shoulder_slope"]>0) or 1==1)
+                        and (
+                        (xy_coordinate_positions["ear_slope"]*xy_coordinate_positions["shoulder_slope"]>=0) 
+                        #or(xy_coordinate_positions["shoulder_slope"]*xy_coordinate_positions["ear_slope"]<0 and abs(math.degrees(math.atan(xy_coordinate_positions["ear_slope"])))<=degrees_shoulder_slope_max*0.8)
+                        or 1==1
+                        )
                        ) :  #always follow shoulder if its in limits
                        print ("Following Shoulder slope and trying to Reset nose slope as shoulder slope is in limit and shoulder and ear have same inclines and nose slope in limits and different inclined as shoulder and shoulder slope in limits",file=sys.stderr, flush=True)
                        if (math.degrees((math.atan(nose_slope))>=0) and math.degrees((math.atan(nose_slope))<=90)):
