@@ -43,7 +43,8 @@ POSEDETECTOR_BODY_PARTS=["nose","left eye (inner)","left eye","left eye (outer)"
 "left hip","right hip","left knee","right knee","left ankle","right ankle",
 "left heel","right heel","left foot index","right foot index"]
 
-lock = threading.Lock()  # a lock on global scope, or self.lock = threading.Lock() in your class's __init_
+lock = threading.Lock()  
+# a lock on global scope, or self.lock = threading.Lock() in your class's __init_
 
 
 np.seterr(divide='ignore', invalid='ignore')
