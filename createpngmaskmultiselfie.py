@@ -64,7 +64,7 @@ def detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_resu
     
     # print(face_position)
     # sys.exit()
-    combined_condition=(condition_hair| condition_background| condition_face_skin|condition_others|condition_bodyskin) 
+    combined_condition=(condition_hair| condition_background| condition_face_skin|condition_bodyskin) 
     # combined_condition=(condition_hair| condition_background| condition_face_skin|condition_others)
     output_combined_image=np.where(combined_condition,human_image_copy, imgOverlay)
     return output_combined_image
