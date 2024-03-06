@@ -20,8 +20,8 @@ pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 USE_CV_POSE_DETECTOR=False
 model_path="D:\\VTON\\Models\\selfie_multiclass_256x256.tflite"
-human_path = 'D:\\VTON\\overlay\\human_image302.jpg'
-input_path = "D:\\VTON\\overlay\\necklace8.png"
+human_path = 'D:\\VTON\\overlay\\human_image18.png'
+input_path = "D:\\VTON\\overlay\\necklace14.jpg"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
 model="isnet-general-use"
@@ -46,6 +46,7 @@ options = vision.ImageSegmenterOptions(base_options=base_options,running_mode=Vi
                                               output_category_mask=1)
 
 def resizeAndPad(img, size, padColor=255):
+
     h, w = img.shape[:2]
     sh, sw = size
 
@@ -66,7 +67,7 @@ def resizeAndPad(img, size, padColor=255):
         pad_horz = float(sw - new_w) / 2
         pad_left, pad_right = np.floor(pad_horz).astype(int), np.ceil(pad_horz).astype(int)
         pad_top, pad_bot = 0, 0
-
+        
     elif (saspect < aspect) or ((saspect == 1) and (aspect >= 1)):  # new vertical image
         new_w = sw
         new_h = np.round(float(new_w) / aspect).astype(int)
@@ -83,8 +84,7 @@ def resizeAndPad(img, size, padColor=255):
     scaled_img = cv2.copyMakeBorder(scaled_img, pad_top, pad_bot, pad_left, pad_right, borderType=cv2.BORDER_CONSTANT, value=padColor)
 
     return scaled_img
-    
-   
+  
 
 
 #neckalce image
@@ -113,7 +113,7 @@ def detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_resu
     
     # print(face_position)
     # sys.exit()
-    combined_condition=(condition_hair| condition_background| condition_face_skin|condition_others|condition_bodyskin) 
+    combined_condition=(condition_hair| condition_background| condition_face_skin|condition_bodyskin|condition_others) 
     # combined_condition=(condition_hair| condition_background| condition_face_skin|condition_others)
     output_combined_image=np.where(combined_condition,human_image_copy, imgOverlay)
     return output_combined_image
@@ -287,23 +287,27 @@ def slope_intercept(p1,p2):
     intercept=p1[1]-slope*p1[0]
     return slope,intercept
 
-def get_jewellery_image_mask(img):
+def get_jewellery_image_mask(img,debug=True):
     if (img.shape[2]==4):
         if (np.any(img[:,:,3]==0)):
-            print("Jewellery Image has Alpha - using it directly as mask")
+            if (debug==True):
+                print("Jewellery Image has Alpha - using it directly as mask")
+            
             masked_image=img
         else:
-            print("Jewellery Image has Alpha - but the mask has no 0 alpha values")
+            if (debug==True):
+                print("Jewellery Image has Alpha - but the mask has no 0 alpha values")
+            
             mask,masked_image=create_mask_img(img)
     else:
         mask,masked_image=create_mask_img(img)
     return (masked_image)
 
 
-def get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False,use_cv_pose_detector=True):
+def get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False,use_cv_pose_detector=True,debug=True):
     try:
     
-        human_image,face_position=extract_face.getSelfieImageandFaceLandMarkPoints(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment,use_cv_pose_detector)
+        human_image,face_position=extract_face.getSelfieImageandFaceLandMarkPoints(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment,use_cv_pose_detector,debug)
         human_image_tf = mp.Image(image_format=mp.ImageFormat.SRGB, data=human_image)
         with vision.ImageSegmenter.create_from_options(options) as segmenter:
             segmentation_result = segmenter.segment(human_image_tf)
@@ -315,7 +319,7 @@ def get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER=True,use_differen
     
 def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=False):
     
-    masked_image=get_jewellery_image_mask(img)
+    masked_image=get_jewellery_image_mask(img,debug)
     jewellery_position["right_shoulder_pivot"]=[0,0]
     jewellery_position["left_shoulder_pivot"]=[0,0]
     jewellery_position["thorax_midpoint"]=[0,0]
@@ -355,7 +359,8 @@ def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=F
     jewellery_xy_position["image_height"]=jewellery_position["image_height"]
     jewellery_position=rescale_coordinates(jewellery_position,jewellery_resize_scale)
     jewellery_xy_position=rescale_coordinates(jewellery_xy_position,jewellery_resize_scale)
-    cv2.imshow("masked_image",masked_image)
+    if (debug==True):
+        cv2.imshow("masked_image",masked_image)
     # masked_image=cv2.resize(masked_image, (jewellery_position["image_width"],jewellery_position["image_height"]), interpolation = cv2.INTER_LANCZOS4)
     # cv2.imshow("resized image opencv",masked_image)
 
@@ -396,7 +401,9 @@ def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=F
     [[0,0]],[[masked_image.shape[1],0]],
     [[masked_image.shape[1],masked_image.shape[0]]],[[0,masked_image.shape[0]]],
     ])
-    cv2.imshow("masked_image_before_transform",masked_image)
+    if (debug==True):
+        cv2.imshow("masked_image_before_transform",masked_image)
+    
     transformed_important_points=cv2.perspectiveTransform(important_points,M)
     # print("transformed points")
     # print(important_points)
@@ -412,7 +419,9 @@ def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=F
         if (points[0][1]<yadd):
             yadd=points[0][1]
 
-    print(xadd,yadd)
+    if (debug==True):
+        print(xadd,yadd)
+    
     xadd=round(abs(xadd))
     yadd=round(abs(yadd))
     perspective_masked_image=cv2.warpPerspective(masked_image,M,(masked_image.shape[1]+xadd, masked_image.shape[0]+yadd),flags=cv2.INTER_LINEAR)
@@ -420,7 +429,7 @@ def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=F
     return (perspective_masked_image,masked_image,jewellery_position,face_position)
 
 
-def overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result):
+def overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result,debug=False):
     human_image_copy=human_image.copy()
     overlaypoint_x=face_position["thorax_midpoint"][0]-jewellery_position["thorax_midpoint"][0]
     overlaypoint_y=face_position["thorax_midpoint"][1]-jewellery_position["thorax_midpoint"][1]
@@ -430,7 +439,8 @@ def overlay_jewellery_on_face(jewellery_position,face_position,human_image,persp
     # print(overlaypoint_x, overlaypoint_y)
 
     imgOverlay = cvzone.overlayPNG(human_image, perspective_masked_image, pos=[overlaypoint_x, overlaypoint_y])
-    cv2.imshow("Overlayed - non corrected",imgOverlay)
+    if (debug==True):
+        cv2.imshow("Overlayed - non corrected",imgOverlay)
     # cv2.imshow("Perspective",perspective_masked_image)
 
     imgOverlay=detect_reapply_face_multiscale(imgOverlay,human_image_copy,segmentation_result,face_position)
@@ -468,7 +478,7 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
         
         cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
 
-        imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
+        imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result,debug=True)
         return imgOverlay
     
     except:
@@ -507,47 +517,15 @@ def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFI
             cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
 
             
-        imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
+        imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result,debug)
         return imgOverlay
     except:
         raise Exception("Unable to determine Jewellery points")
      
-def main():
+def main(video=False):
     global interested_points,computed_points,face_z_index_points,USE_CV_POSE_DETECTOR
-    img = cv2.imread(input_path,cv2.IMREAD_UNCHANGED)
-    
-    # cv2.imshow("neckalce",img)
-    #human image
-    human_image=cv2.imread(human_path,cv2.IMREAD_UNCHANGED)
-    print(human_image.shape)
-    if (human_image.shape[2]==4):
-        print("Converting PNG to BGR")
-        human_image=cv2.cvtColor(human_image, cv2.COLOR_BGRA2BGR)
-    # human_image=resizeAndPad(human_image,(400,400))
     RUN_CV_SELFIE_SEGMENTER=False
-    #initialization of mediapipe selfie_multiclass
-    # cv2.imshow("selfie",human_image)
-    status="success"
-    message=""
-    # try:
-    human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True,use_cv_pose_detector=USE_CV_POSE_DETECTOR)
-    # except Exception as e:
-        # status="error"
-        # message=e
     
-    print(status)
-    print(message)
-    # cv2.namedWindow("Masked Image")
-    # cv2.moveWindow("Masked Image", 10,10)
-    human_image_copy=human_image.copy()
-    
-
-    # print(masked_image.shape)
-    # print(masked_image[0][0])
-
-
-
-
     #necklace1.jpg
     # jewellery_position={
     # 'thorax_top':[404,320],
@@ -599,17 +577,17 @@ def main():
 
     # ##necklace6.jpg
     # jewellery_position={
-    # 'thorax_top':[111,75],
-    # 'thorax_bottom':[111,225],
+    # 'thorax_top':[111,80],
+    # 'thorax_bottom':[111,255],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
     # }
 
-    # ##necklace7.png
+    ##necklace7.png
     # jewellery_position={
-    # 'thorax_top':[128,123],
-    # 'thorax_bottom':[128,323],
+    # 'thorax_top':[128,120],
+    # 'thorax_bottom':[128,320],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
@@ -617,8 +595,8 @@ def main():
 
     ##necklace8.png
     jewellery_position={
-    'thorax_top':[270,120],
-    'thorax_bottom':[270,470],
+    'thorax_top':[270,135],
+    'thorax_bottom':[270,500],
     'thorax_midpoint':[0,0],
     'left_shoulder_pivot':[385,392],
     'right_shoulder_pivot':[25,392]
@@ -635,8 +613,8 @@ def main():
 
     ##necklace10.png
     # jewellery_position={
-    # 'thorax_top':[146,111],
-    # 'thorax_bottom':[146,301],
+    # 'thorax_top':[146,101],
+    # 'thorax_bottom':[146,307],
     # 'thorax_midpoint':[0,0],
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
@@ -669,59 +647,170 @@ def main():
     # 'left_shoulder_pivot':[385,392],
     # 'right_shoulder_pivot':[25,392]
     # }
-    cv2.imshow("Jewellery Image",img)
-    perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(img,jewellery_position,face_position,debug=True)
-    horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
-    vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
-    if (USE_CV_POSE_DETECTOR==False):
-        col2=(255,0,0)#cv color
-        col1=(0,0,255)#mp color
-    else:
-        col2=(0,0,255)#mp color
-        col1=(255,0,0)#cv color
-        
-    no_points_human_image=human_image.copy()
-    if (show_points==True):
-        for key in face_position:
-             if isinstance(face_position[key], list):
-               if key in interested_points:
-                   if key in computed_points:
-                    cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=5, color=col1, thickness=-1)
-                # print(key)
-                   elif key in face_z_index_points:
-                    cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=5, color=(0,255,0), thickness=-1)
-                   else:
-                    cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=5, color=col2, thickness=-1)
-
-        center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
-        axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
-        print ("Elliptical Markings")
-        
-        cv2.ellipse(human_image,center,axes,-1*math.degrees(face_position["shoulder_slope"]),0,360,(255,0,0),1)
-        
-    cv2.imshow("Detected Points",human_image)  
-
-    cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
-    cv2.imshow("perspective_masked_image",perspective_masked_image)
     
-    if (show_points==True):
-        imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
-        cv2.imshow("Masked Image with points",imgOverlay)
+        # # ##necklace13.png
+    # jewellery_position={
+    # 'thorax_top':[150,90],
+    # 'thorax_bottom':[150,315],
+    # 'thorax_midpoint':[0,0],
+    # 'left_shoulder_pivot':[385,392],
+    # 'right_shoulder_pivot':[25,392]
+    # }
     
-    no_points_imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,no_points_human_image,perspective_masked_image,segmentation_result)
-    cv2.imshow("Final Image",no_points_imgOverlay)
+         # ##necklace14.jpg
+    jewellery_position={
+    'thorax_top':[138,65],
+    'thorax_bottom':[138,292],
+    'thorax_midpoint':[0,0],
+    'left_shoulder_pivot':[385,392],
+    'right_shoulder_pivot':[25,392]
+    }
     
-    ### use cv2.imencode to encode in format for rest api
-    # cv2.imwrite("D:\\VTON\\overlay\\final_image.jpg",imgOverlay)
+    if (video==False):   
+        img = cv2.imread(input_path,cv2.IMREAD_UNCHANGED)
+        
+        # cv2.imshow("neckalce",img)
+        #human image
+        human_image=cv2.imread(human_path,cv2.IMREAD_UNCHANGED)
+        print(human_image.shape)
+        if (human_image.shape[2]==4):
+            print("Converting PNG to BGR")
+            human_image=cv2.cvtColor(human_image, cv2.COLOR_BGRA2BGR)
+        # human_image=resizeAndPad(human_image,(400,400))
+        
+        #initialization of mediapipe selfie_multiclass
+        # cv2.imshow("selfie",human_image)
+        status="success"
+        message=""
+        # try:
+        human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True,use_cv_pose_detector=USE_CV_POSE_DETECTOR,debug=True)
+        # except Exception as e:
+            # status="error"
+            # message=e
+        
+        print(status)
+        print(message)
+        # cv2.namedWindow("Masked Image")
+        # cv2.moveWindow("Masked Image", 10,10)
+        human_image_copy=human_image.copy()
+        
 
-    # final_image[:,:,:]=
-
-    # imgOut = segmentor.removeBG(imgOverlay, imgBg=(255, 255, 255), cutThreshold=0.4)
-
-    # cv2.moveWindow("Masked Image",10,10)
+        # print(masked_image.shape)
+        # print(masked_image[0][0])
 
 
 
 
+        
+        cv2.imshow("Jewellery Image",img)
+        perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(img,jewellery_position,face_position,debug=True)
+        horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
+        vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
+        if (USE_CV_POSE_DETECTOR==False):
+            col2=(255,0,0)#cv color
+            col1=(0,0,255)#mp color
+        else:
+            col2=(0,0,255)#mp color
+            col1=(255,0,0)#cv color
+            
+        no_points_human_image=human_image.copy()
+        if (show_points==True):
+            for key in face_position:
+                 if isinstance(face_position[key], list):
+                   if key in interested_points:
+                       if key in computed_points:
+                        cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=5, color=col1, thickness=-1)
+                    # print(key)
+                       elif key in face_z_index_points:
+                        cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=5, color=(0,255,0), thickness=-1)
+                       else:
+                        cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=5, color=col2, thickness=-1)
+
+            center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
+            axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
+            print ("Elliptical Markings")
+            
+            cv2.ellipse(human_image,center,axes,-1*math.degrees(face_position["shoulder_slope"]),0,360,(255,0,0),1)
+            
+        cv2.imshow("Detected Points",human_image)  
+        if (show_points==True):
+            cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
+        
+        cv2.imshow("perspective_masked_image",perspective_masked_image)
+        
+        if (show_points==True):
+            imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result,debug=True)
+            cv2.imshow("Masked Image with points",imgOverlay)
+        
+        no_points_imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,no_points_human_image,perspective_masked_image,segmentation_result,debug=True)
+        cv2.imshow("Final Image",no_points_imgOverlay)
+        
+        ### use cv2.imencode to encode in format for rest api
+        # cv2.imwrite("D:\\VTON\\overlay\\final_image.jpg",imgOverlay)
+
+        # final_image[:,:,:]=
+
+        # imgOut = segmentor.removeBG(imgOverlay, imgBg=(255, 255, 255), cutThreshold=0.4)
+
+        # cv2.moveWindow("Masked Image",10,10)
+
+    elif (video==True):
+        #Display Width and Height
+        window_width=640
+        window_height=480
+        
+        orig_jewellery_position=jewellery_position
+        img = cv2.imread(input_path,cv2.IMREAD_UNCHANGED)
+        cap = cv2.VideoCapture(0)
+        window_name = "VTON"
+        if (cap.isOpened()== False): 
+            print("Error opening video stream or file")
+        cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
+        cv2.resizeWindow(window_name, window_width, window_height)
+        while(cap.isOpened()):
+          # Capture frame-by-frame
+          ret, frame = cap.read()
+          if ret == True:
+           jewellery_position=orig_jewellery_position
+           if cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) <1:
+              cap.release()
+              cv2.destroyAllWindows()
+              break
+            
+           else:
+               human_image=frame
+               print(human_image.shape)
+               
+               if (human_image.shape[2]==4):
+                    print("Converting PNG to BGR")
+                    human_image=cv2.cvtColor(human_image, cv2.COLOR_BGRA2BGR)
+               try:
+                   human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True,use_cv_pose_detector=USE_CV_POSE_DETECTOR,debug=False)
+                   status="success"
+                   message=""
+                   print(status)
+                   print(message)
+                   human_image_copy=human_image.copy()
+                   
+                   perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(img,jewellery_position,face_position,debug=False)
+                   horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
+                   vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
+                   no_points_human_image=human_image.copy()
+                   imgOut=overlay_jewellery_on_face(jewellery_position,face_position,no_points_human_image,perspective_masked_image,segmentation_result,debug=False)
+                   
+                   
+                   cv2.imshow(window_name,imgOut)
+               
+               except Exception as e:
+                    print(e)
+               
+               # Press Q on keyboard to  exit
+               if cv2.waitKey(10) & 0xFF == ord('q'):
+                  break
+          # Break the loop
+          else: 
+            break
+            
+            
 if __name__ == "__main__":
-    main()
+    main(video=False)

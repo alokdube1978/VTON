@@ -23,7 +23,7 @@ global_normalized_ears_z_limit=0.2
 global_vertical_ratio=42
 global_max_vertical_horizontal_ratio=1.15
 global_max_horizontal_vertical_ratio=1.08
-global_horizontal_ratio=global_vertical_ratio*1.5
+global_horizontal_ratio=50
 global_shoulder_to_nose_eyes_ratio_max=9.2
 
 global_vertical_offet=90-global_degrees_nose_slope_min
@@ -193,10 +193,10 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     ear_to_eye_nose_ratio_min=global_ear_to_eye_nose_ratio_min
     
     shape=img.shape
-    min_img_x=0
-    min_img_y=0
-    max_img_x=shape[1]
-    max_img_y=shape[0]
+    min_img_x=round(0.04*shape[1])
+    min_img_y=round(0.04*shape[0])
+    max_img_x=round(0.96*shape[1])
+    max_img_y=round(0.96*shape[0])
     
     with lock:
         if (RUN_CV_SELFIE_SEGMENTER==True):
@@ -335,11 +335,13 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     face_nose_thorax_distance=math.dist(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
     shoulder_points_distance=math.dist(xy_coordinate_positions["left_shoulder"],xy_coordinate_positions["right_shoulder"])
     xy_coordinate_positions["shoulder_points_distance"]=shoulder_points_distance
+    orig_shoulder_distance=shoulder_points_distance
     ear_distance=math.dist(xy_coordinate_positions["left_ear"],xy_coordinate_positions["right_ear"])
     xy_coordinate_positions["ear_distance"]=ear_distance
     xy_coordinate_positions["face_nose_thorax_distance"]=face_nose_thorax_distance
     eye_nose_distance=math.dist(xy_coordinate_positions["nose"],xy_coordinate_positions["eye_midpoint"])
     xy_coordinate_positions["eye_nose_distance"]=eye_nose_distance
+    orig_eye_nose_distance=eye_nose_distance
     shoulder_to_nose_eyes_ratio=xy_coordinate_positions["shoulder_points_distance"]/xy_coordinate_positions["eye_nose_distance"]
     xy_coordinate_positions["shoulder_to_nose_eyes_ratio"]=shoulder_to_nose_eyes_ratio
     print("EyeNose Distance:"+str(eye_nose_distance),file=sys.stderr, flush=True)
@@ -427,9 +429,8 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         
         else:
             print("NoseThorax to EyeNose ratio less than 1.05 limit",file=sys.stderr, flush=True)
-            # face_nose_thorax_distance=nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"] 
-            xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
-            thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
+            # xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
+            # thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
             face_nose_thorax_distance=nose_thorax_to_nose_eyes_ratio_avg*xy_coordinate_positions["eye_nose_distance"] 
         
     elif (xy_coordinate_positions["face_nose_thorax_distance"]<nose_thorax_to_nose_eyes_ratio_min*xy_coordinate_positions["eye_nose_distance"]
@@ -442,8 +443,8 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         multiplier=xy_coordinate_positions["orig_thorax_nose_to_eye_nose_ratio"]/thorax_nose_to_eye_nose_ratio
         print ("Multiplier:"+str(multiplier),file=sys.stderr,flush=True)
         orig_multiplier=multiplier
-        if (multiplier<=1) :
-            multiplier=1.5
+        if (multiplier<0.8) :
+            multiplier=1.15
             xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(nose_thorax_to_nose_eyes_ratio_min*multiplier,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
             multiplier=orig_multiplier
         elif (multiplier<=1.15) :
@@ -503,7 +504,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     if use_different_horizontal_vertical_scale==True:
         
         xy_coordinate_positions["horizontal_reduced_circle_radius"]=round(xy_coordinate_positions["shoulder_points_distance"]/2* horizontal_ratio/100)
-        xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * vertical_ratio/100)
+        xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["shoulder_points_distance"]/2*horizontal_ratio/100)
     else:
         xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * vertical_ratio/100)
         xy_coordinate_positions["horizontal_reduced_circle_radius"]=xy_coordinate_positions["vertical_reduced_circle_radius"]
