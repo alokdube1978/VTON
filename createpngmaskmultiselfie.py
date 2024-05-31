@@ -49,6 +49,37 @@ options = vision.ImageSegmenterOptions(base_options=base_options,running_mode=Vi
 # modelSelection: 0 for short-range detection (2 meters), 1 for long-range detection (5 meters)
 # detector = FaceDetector(minDetectionCon=0.5, modelSelection=1)
 
+def run_histogram_equalization(img, clahe=True,y_only=False,passon=False):
+    if passon==True:
+        return img
+    if clahe== True:
+        # apply clahe
+        print("Applying equilization using CLAHE",file=sys.stderr, flush=True)
+        img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+        clahe = cv2.createCLAHE(clipLimit=2, tileGridSize=(4,4))
+        img_yuv[:, :, 0] = clahe.apply(img_yuv[:,:,0])
+        equalized_img = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+    else:
+        if (y_only==False):
+            # equalize the histogram of the Y channel
+            print("Applying YCrCB histogram correction, all YCrCb channels",file=sys.stderr, flush=True)
+            # convert from RGB color-space to YCrCb
+            ycrcb_img = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+            ycrcb_img[:, :, 0] = cv2.equalizeHist(ycrcb_img[:, :, 0])
+            equalized_img = cv2.cvtColor(ycrcb_img, cv2.COLOR_YCrCb2BGR)
+        else:
+            print("Applying YCrCB histogram correction, only Y channels",file=sys.stderr, flush=True)
+            # convert from RGB color-space to YCrCb
+            ycrcb_img = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+            y, cr, cb = cv2.split(ycrcb_img)
+            y_eq = cv2.equalizeHist(y)
+            final_img = cv2.merge((y_eq, cr, cb))
+            equalized_img = cv2.cvtColor(final_img, cv2.COLOR_YCrCb2BGR)
+            
+    # convert back to RGB color-space from YCrCb
+    
+    return equalized_img
+
 
 
     
@@ -139,7 +170,8 @@ def create_mask_img(img):
     img_gray = cv2.cvtColor(bg, cv2.COLOR_BGR2GRAY)
    
     
-    ret, mask = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    ret, mask = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY+cv2.ADAPTIVE_THRESH_MEAN_C)
+    print ("using Adaptive Thresholding to Mask Jewelery",file=sys.stderr, flush=True)
     # cv2.imshow("threshold mask",mask)
     # mask=cv2.threshold
     mask = cv2.bitwise_not(mask) #we need to set those regions to remove as black
@@ -424,7 +456,8 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
         cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
 
         imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
-        return imgOverlay
+        final_image=run_histogram_equalization(imgOverlay)
+        return final_image
     
     except:
         raise Exception("Unable to determine Jewellery points")
@@ -464,7 +497,8 @@ def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFI
 
             
         imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
-        return imgOverlay
+        final_image=run_histogram_equalization(imgOverlay)
+        return final_image
     except:
         raise Exception("Unable to determine Jewellery points")
     
@@ -600,9 +634,9 @@ def main():
 
     cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
 
-    imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
-    
-    cv2.imshow("Masked Image",imgOverlay)
+    imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image_no_points,segmentation_result)
+    final_image=run_histogram_equalization(imgOverlay)
+    cv2.imshow("Masked Image",final_image)
     ### use cv2.imencode to encode in format for rest api
     # cv2.imwrite("D:\\VTON\\overlay\\final_image.jpg",imgOverlay)
 

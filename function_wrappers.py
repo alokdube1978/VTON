@@ -14,6 +14,13 @@ app = Flask(__name__)
 CORS(app)
 
 
+def _build_cors_preflight_response():
+    response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
 def resizeAndPad(img, size, padColor=255):
 
     h, w = img.shape[:2]
@@ -201,8 +208,8 @@ def index():
 def overlayimage():
     status="success"
     if (request.method=="OPTIONS"):
-        return
-        
+        return _build_cors_preflight_response()
+    
     if (request.method=="POST"):
         try:
             content = request.json
