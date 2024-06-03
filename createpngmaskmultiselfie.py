@@ -21,8 +21,8 @@ USE_CV_POSE_DETECTOR=False
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)
 model_path="./Models/selfie_multiclass_256x256.tflite"
-human_path = './VTON/overlay/public3.jpg'
-input_path = "./VTON/overlay/necklace8.png"
+human_path = './overlay/public3.jpg'
+input_path = "./overlay/necklace8.png"
 BG_COLOR = (192, 192, 192) # gray
 MASK_COLOR = (255, 255, 255) # white
 model="isnet-general-use"
@@ -456,8 +456,8 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
         cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
 
         imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
-        final_image=run_histogram_equalization(imgOverlay)
-        return final_image
+        # final_image=run_histogram_equalization(imgOverlay)
+        return imgOverlay
     
     except:
         raise Exception("Unable to determine Jewellery points")
@@ -497,8 +497,8 @@ def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFI
 
             
         imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
-        final_image=run_histogram_equalization(imgOverlay)
-        return final_image
+        # final_image=run_histogram_equalization(imgOverlay)
+        return imgOverlay
     except:
         raise Exception("Unable to determine Jewellery points")
     

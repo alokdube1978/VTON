@@ -62,118 +62,7 @@ def resizeAndPad(img, size, padColor=255):
     return scaled_img
     
     
-    
-    #necklace1.jpg
-    # jewellery_position={
-    # 'thorax_top':[404,320],
-    # 'thorax_bottom':[404,740],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[794,456],
-    # 'right_shoulder_pivot':[5,456]
-    # }
 
-    # # #necklace2.jpg
-    # jewellery_position={
-    # 'thorax_top':[184,155],
-    # 'thorax_bottom':[184,393],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[306,304],
-    # 'right_shoulder_pivot':[84,304]
-    # }
-
-
-    # #necklace3.jpg
-    # jewellery_position={
-    # 'thorax_top':[210,287],
-    # 'thorax_bottom':[210,501],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
-
-
-    # ##necklace4.jpg
-    # jewellery_position={
-    # 'thorax_top':[225,298],
-    # 'thorax_bottom':[225,525],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
-
-
-    # ##necklace5.jpg
-    # jewellery_position={
-    # 'thorax_top':[245,120],
-    # 'thorax_bottom':[245,369],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
-
-
-    # ##necklace6.jpg
-    # jewellery_position={
-    # 'thorax_top':[111,40],
-    # 'thorax_bottom':[111,240],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
-
-    # ##necklace7.png
-    # jewellery_position={
-    # 'thorax_top':[128,93],
-    # 'thorax_bottom':[128,293],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
-
-    # ##necklace8.png
-    # jewellery_position={
-    # 'thorax_top':[170,90],
-    # 'thorax_bottom':[170,320],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
-
-    # ##necklace9.png
-    # jewellery_position={
-    # 'thorax_top':[417,257],
-    # 'thorax_bottom':[417,757],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
-
-    # ##necklace10.png
-    # jewellery_position={
-    # 'thorax_top':[143,111],
-    # 'thorax_bottom':[143,301],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
-
-    # ##necklace11.png
-    # jewellery_position={
-    # 'thorax_top':[181,207],
-    # 'thorax_bottom':[175,384],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
-    
-    # ##necklace11.png
-    # jewellery_position={
-    # 'thorax_top':[175,187],
-    # 'thorax_bottom':[175,364],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
 
 
 
@@ -211,8 +100,10 @@ def overlayimage():
         return _build_cors_preflight_response()
     
     if (request.method=="POST"):
+        content = request.json
+        # print("JSON input",file=sys.stderr, flush=True)
+        # print(jsonify(content),file=sys.stderr, flush=True)
         try:
-            content = request.json
             # print("JSON input",file=sys.stderr, flush=True)
             # print(content,file=sys.stderr, flush=True)
             print("Points",file=sys.stderr, flush=True)
@@ -276,12 +167,14 @@ def overlayimage():
     if (status=="success"):
         try:
             imgOut=get_masked_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False,debug=False,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True,use_cv_pose_detector=False)
-            if (imgOut.shape[0]>400 and imgOut.shape[1]>400):
-                imgOut=resizeAndPad(imgOut,(400,400))
-                print("resizing Output Image as both >400",file=sys.stderr, flush=True)
-            elif (imgOut.shape[0]>600 or imgOut.shape[1]>600):
-                imgOut=resizeAndPad(imgOut,(500,500))
-                print("resizing Output as one >600",file=sys.stderr, flush=True)
+            if (content.get("resize","true")=="true"):
+                print("resizing true selected",file=sys.stderr, flush=True)
+                if (imgOut.shape[0]>400 and imgOut.shape[1]>400):
+                    imgOut=resizeAndPad(imgOut,(400,400))
+                    print("resizing Output Image as both >400",file=sys.stderr, flush=True)
+                elif (imgOut.shape[0]>600 or imgOut.shape[1]>600):
+                    imgOut=resizeAndPad(imgOut,(500,500))
+                    print("resizing Output as one >600",file=sys.stderr, flush=True)
         except Exception as e:
             status="error"
             message=str(e)
@@ -345,11 +238,11 @@ def preview():
         return
     
     if (request.method=="POST"):
-       
+        content = request.json
         # print("JSON input",file=sys.stderr, flush=True)
-        # print(content,file=sys.stderr, flush=True)
+        # print(jsonify(request.json),file=sys.stderr, flush=True)
         try:
-            content = request.json
+            
             print("Points",file=sys.stderr, flush=True)
             print(content['points'],file=sys.stderr, flush=True)
             jewellery_image= data_uri_to_cv2_img(content["jewellery_image"])
@@ -401,12 +294,17 @@ def preview():
     if (status=="success"):
         try:
             imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=False,use_different_horizontal_vertical_scale=True,force_shoulder_z_alignment=True,use_cv_pose_detector=False)
-            if (imgOut.shape[0]>400 and imgOut.shape[1]>400):
-                imgOut=resizeAndPad(imgOut,(400,400))
-                print("resizing Output Image as both >400",file=sys.stderr, flush=True)
-            elif (imgOut.shape[0]>600 or imgOut.shape[1]>600):
-                imgOut=resizeAndPad(imgOut,(500,500))
-                print("resizing Output as one >600",file=sys.stderr, flush=True)
+            print("content")
+            print(content,file=sys.stderr, flush=True)
+            print(content.get("resize","true"),file=sys.stderr, flush=True)
+            if (content.get("resize","true")=="true"):
+                print("resizing true passed",file=sys.stderr, flush=True)
+                if (imgOut.shape[0]>400 and imgOut.shape[1]>400):
+                    imgOut=resizeAndPad(imgOut,(400,400))
+                    print("resizing Output Image as both >400",file=sys.stderr, flush=True)
+                elif (imgOut.shape[0]>600 or imgOut.shape[1]>600):
+                    imgOut=resizeAndPad(imgOut,(500,500))
+                    print("resizing Output as one >600",file=sys.stderr, flush=True)
         
         except Exception as e:
             status="error"
