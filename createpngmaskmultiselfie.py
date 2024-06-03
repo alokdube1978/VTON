@@ -337,12 +337,12 @@ def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=F
     jewellery_position=rescale_coordinates(jewellery_position,jewellery_resize_scale)
     jewellery_xy_position=rescale_coordinates(jewellery_xy_position,jewellery_resize_scale)
     # cv2.imshow("masked_image",masked_image)
-    # masked_image=cv2.resize(masked_image, (jewellery_position["image_width"],jewellery_position["image_height"]), interpolation = cv2.INTER_LANCZOS4)
+    masked_image=cv2.resize(masked_image, (jewellery_position["image_width"],jewellery_position["image_height"]), interpolation = cv2.INTER_LANCZOS4)
     # cv2.imshow("resized image opencv",masked_image)
 
-    PIL_masked_image= Image.fromarray(cv2.cvtColor(masked_image, cv2.COLOR_BGRA2RGBA))
-    PIL_masked_image=PIL_masked_image.resize((jewellery_position["image_width"],jewellery_position["image_height"]),Image.Resampling.LANCZOS )
-    masked_image=cv2.cvtColor(np.array(PIL_masked_image), cv2.COLOR_RGBA2BGRA)
+    # PIL_masked_image= Image.fromarray(cv2.cvtColor(masked_image, cv2.COLOR_BGRA2RGBA))
+    # PIL_masked_image=PIL_masked_image.resize((jewellery_position["image_width"],jewellery_position["image_height"]),Image.Resampling.LANCZOS )
+    # masked_image=cv2.cvtColor(np.array(PIL_masked_image), cv2.COLOR_RGBA2BGRA)
     # cv2.imshow("resized masked_image_pillow",masked_image)
 
     if (debug==True):
@@ -407,6 +407,52 @@ def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=F
     return (perspective_masked_image,masked_image,jewellery_position,face_position)
 
 
+
+def add_transparent_image(background, foreground, x_offset=None, y_offset=None):
+    bg_h, bg_w, bg_channels = background.shape
+    fg_h, fg_w, fg_channels = foreground.shape
+
+    assert bg_channels == 3, f'background image should have exactly 3 channels (RGB). found:{bg_channels}'
+    assert fg_channels == 4, f'foreground image should have exactly 4 channels (RGBA). found:{fg_channels}'
+
+    # center by default
+    if x_offset is None: x_offset = (bg_w - fg_w) // 2
+    if y_offset is None: y_offset = (bg_h - fg_h) // 2
+
+    w = min(fg_w, bg_w, fg_w + x_offset, bg_w - x_offset)
+    h = min(fg_h, bg_h, fg_h + y_offset, bg_h - y_offset)
+
+    if w < 1 or h < 1: return
+
+    # clip foreground and background images to the overlapping regions
+    bg_x = max(0, x_offset)
+    bg_y = max(0, y_offset)
+    fg_x = max(0, x_offset * -1)
+    fg_y = max(0, y_offset * -1)
+    foreground = foreground[fg_y:fg_y + h, fg_x:fg_x + w]
+    background_subsection = background[bg_y:bg_y + h, bg_x:bg_x + w]
+
+    # separate alpha and color channels from the foreground image
+    foreground_colors = foreground[:, :, :3]
+    # alpha_channel=np.where((foreground[:, :, 3]>15)  ,1.0 ,0.0)
+    alpha_channel = foreground[:, :, 3] / 255  # 0-255 => 0.0-1.0
+    # print(alpha_channel.shape)
+    # alpha_channel = foreground[:, :, 3] / 255  # 0-255 => 0.0-1.0
+    
+    alpha_channel=np.where((alpha_channel>0.05) & (alpha_channel<0.4),alpha_channel+0.1,alpha_channel)
+    alpha_channel[alpha_channel<0.1]=0
+    # construct an alpha_mask that matches the image shape
+    alpha_mask = np.dstack((alpha_channel, alpha_channel, alpha_channel))
+    # cv2.imshow("Alpha mask",alpha_mask)
+    # combine the background with the overlay image weighted by alpha
+    composite = background_subsection * (1 - alpha_mask) + foreground_colors * alpha_mask
+
+    # overwrite the section of the background image that has been updated
+    background[bg_y:bg_y + h, bg_x:bg_x + w] = composite
+    return background
+
+
+
 def overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result):
     human_image_copy=human_image.copy()
     overlaypoint_x=face_position["thorax_midpoint"][0]-jewellery_position["thorax_midpoint"][0]
@@ -416,7 +462,8 @@ def overlay_jewellery_on_face(jewellery_position,face_position,human_image,persp
     # print(jewellery_position)
     # print(overlaypoint_x, overlaypoint_y)
 
-    imgOverlay = cvzone.overlayPNG(human_image, perspective_masked_image, pos=[overlaypoint_x, overlaypoint_y])
+    # imgOverlay = cvzone.overlayPNG(human_image, perspective_masked_image, pos=[overlaypoint_x, overlaypoint_y])
+    imgOverlay=add_transparent_image(human_image,perspective_masked_image,overlaypoint_x,overlaypoint_y)
     # cv2.imshow("IO",imgOverlay)
     # cv2.imshow("Perspective",perspective_masked_image)
 
@@ -635,7 +682,8 @@ def main():
     cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
 
     imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image_no_points,segmentation_result)
-    final_image=run_histogram_equalization(imgOverlay)
+    # final_image=run_histogram_equalization(imgOverlay)
+    final_image=imgOverlay
     cv2.imshow("Masked Image",final_image)
     ### use cv2.imencode to encode in format for rest api
     # cv2.imwrite("D:\\VTON\\overlay\\final_image.jpg",imgOverlay)
