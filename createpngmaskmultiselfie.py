@@ -411,8 +411,10 @@ def add_transparent_image(background, foreground, x_offset=None, y_offset=None):
     bg_h, bg_w, bg_channels = background.shape
     fg_h, fg_w, fg_channels = foreground.shape
 
-    assert bg_channels == 3, f'background image should have exactly 3 channels (RGB). found:{bg_channels}'
-    assert fg_channels == 4, f'foreground image should have exactly 4 channels (RGBA). found:{fg_channels}'
+    if bg_channels != 3:
+        raise AssertionError(f'background image should have exactly 3 channels (RGB). found:{bg_channels}')
+    if fg_channels != 4:
+        raise AssertionError(f'foreground image should have exactly 4 channels (RGBA). found:{fg_channels}')
 
     # center by default
     if x_offset is None: x_offset = (bg_w - fg_w) // 2
@@ -433,10 +435,7 @@ def add_transparent_image(background, foreground, x_offset=None, y_offset=None):
 
     # separate alpha and color channels from the foreground image
     foreground_colors = foreground[:, :, :3]
-    # alpha_channel=np.where((foreground[:, :, 3]>15)  ,1.0 ,0.0)
     alpha_channel = foreground[:, :, 3] / 255  # 0-255 => 0.0-1.0
-    # print(alpha_channel.shape)
-    # alpha_channel = foreground[:, :, 3] / 255  # 0-255 => 0.0-1.0
     
     alpha_channel=np.where((alpha_channel>0.05) & (alpha_channel<0.4),alpha_channel+0.1,alpha_channel)
     alpha_channel[alpha_channel<0.1]=0
@@ -456,12 +455,7 @@ def overlay_jewellery_on_face(jewellery_position,face_position,human_image,persp
     human_image_copy=human_image.copy()
     overlaypoint_x=face_position["thorax_midpoint"][0]-jewellery_position["thorax_midpoint"][0]
     overlaypoint_y=face_position["thorax_midpoint"][1]-jewellery_position["thorax_midpoint"][1]
-    # print ("Overlaying")
-    # print(face_position)
-    # print(jewellery_position)
-    # print(overlaypoint_x, overlaypoint_y)
 
-    # imgOverlay = cvzone.overlayPNG(human_image, perspective_masked_image, pos=[overlaypoint_x, overlaypoint_y])
     imgOverlay=add_transparent_image(human_image,perspective_masked_image,overlaypoint_x,overlaypoint_y)
     # cv2.imshow("IO",imgOverlay)
     # cv2.imshow("Perspective",perspective_masked_image)
@@ -484,10 +478,12 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
         horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
         vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
         for key in face_position:
-             if isinstance(face_position[key], list):
-              if key in interested_points:
-                # print(key)
-                cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
+             if (
+                isinstance(face_position[key], list)
+                and key in interested_points
+            ):
+               # print(key)
+               cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
         if use_different_horizontal_vertical_scale is True:
                 center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
                 axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
@@ -500,7 +496,6 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
         cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
 
         imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
-        # final_image=run_histogram_equalization(imgOverlay)
         return imgOverlay
     
     except:
@@ -522,10 +517,12 @@ def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFI
         vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
         if (debug is True):
             for key in face_position:
-                 if isinstance(face_position[key], list):
-                  if key in interested_points:
-                    # print(key)
-                    cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
+                 if (
+                    isinstance(face_position[key], list)
+                    and key in interested_points
+                ):
+                   # print(key)
+                   cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
 
             if use_different_horizontal_vertical_scale is True:
                 center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
@@ -540,7 +537,6 @@ def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFI
 
             
         imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image,segmentation_result)
-        # final_image=run_histogram_equalization(imgOverlay)
         return imgOverlay
     except:
         raise Exception("Unable to determine Jewellery points")
@@ -561,8 +557,6 @@ def main():
     human_image_copy=human_image.copy()
     
 
-    # print(masked_image.shape)
-    # print(masked_image[0][0])
 
 
 
@@ -577,62 +571,20 @@ def main():
     # }
 
     # # #necklace2.jpg
-    # jewellery_position={
-    # 'thorax_top':[184,165],
-    # 'thorax_bottom':[184,403],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[306,304],
-    # 'right_shoulder_pivot':[84,304]
-    # }
 
 
     # #necklace3.jpg
-    # jewellery_position={
-    # 'thorax_top':[203,307],
-    # 'thorax_bottom':[203,481],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
 
 
     # ##necklace4.jpg
-    # jewellery_position={
-    # 'thorax_top':[225,298],
-    # 'thorax_bottom':[225,525],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
 
 
     # ##necklace5.jpg
-    # jewellery_position={
-    # 'thorax_top':[245,160],
-    # 'thorax_bottom':[245,409],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
 
 
     # ##necklace6.jpg
-    # jewellery_position={
-    # 'thorax_top':[111,40],
-    # 'thorax_bottom':[111,240],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
 
     # ##necklace7.png
-    # jewellery_position={
-    # 'thorax_top':[128,93],
-    # 'thorax_bottom':[128,293],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
 
     ##necklace8.png
     jewellery_position={
@@ -644,22 +596,8 @@ def main():
     }
 
     # ##necklace9.png
-    # jewellery_position={
-    # 'thorax_top':[417,257],
-    # 'thorax_bottom':[417,757],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
 
     # ##necklace10.png
-    # jewellery_position={
-    # 'thorax_top':[143,111],
-    # 'thorax_bottom':[143,301],
-    # 'thorax_midpoint':[0,0],
-    # 'left_shoulder_pivot':[385,392],
-    # 'right_shoulder_pivot':[25,392]
-    # }
 
 
     
@@ -678,15 +616,12 @@ def main():
     cv2.circle(perspective_masked_image,(jewellery_position["thorax_midpoint"][0],jewellery_position["thorax_midpoint"][1]),5,color=(0,255,255),thickness=-1)
 
     imgOverlay=overlay_jewellery_on_face(jewellery_position,face_position,human_image,perspective_masked_image_no_points,segmentation_result)
-    # final_image=run_histogram_equalization(imgOverlay)
     final_image=imgOverlay
     cv2.imshow("Masked Image",final_image)
     ### use cv2.imencode to encode in format for rest api
-    # cv2.imwrite("D:\\VTON\\overlay\\final_image.jpg",imgOverlay)
 
     # final_image[:,:,:]=
 
-    # imgOut = segmentor.removeBG(imgOverlay, imgBg=(255, 255, 255), cutThreshold=0.4)
 
     # cv2.moveWindow("Masked Image",10,10)
 
