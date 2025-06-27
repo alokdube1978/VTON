@@ -50,9 +50,9 @@ options = vision.ImageSegmenterOptions(base_options=base_options,running_mode=Vi
 # detector = FaceDetector(minDetectionCon=0.5, modelSelection=1)
 
 def run_histogram_equalization(img, clahe=True,y_only=False,passon=False):
-    if passon==True:
+    if passon is True:
         return img
-    if clahe== True:
+    if clahe is True:
         # apply clahe
         print("Applying equilization using CLAHE",file=sys.stderr, flush=True)
         img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
@@ -60,7 +60,7 @@ def run_histogram_equalization(img, clahe=True,y_only=False,passon=False):
         img_yuv[:, :, 0] = clahe.apply(img_yuv[:,:,0])
         equalized_img = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
     else:
-        if (y_only==False):
+        if (y_only is False):
             # equalize the histogram of the Y channel
             print("Applying YCrCB histogram correction, all YCrCb channels",file=sys.stderr, flush=True)
             # convert from RGB color-space to YCrCb
@@ -345,7 +345,7 @@ def get_jewellery_perspective_image(img,jewellery_position,face_position,debug=F
     # masked_image=cv2.cvtColor(np.array(PIL_masked_image), cv2.COLOR_RGBA2BGRA)
     # cv2.imshow("resized masked_image_pillow",masked_image)
 
-    if (debug==True):
+    if (debug is True):
         print("in get_jewellery_perspective_image")
         print(debug)
         for key in jewellery_position:
@@ -491,7 +491,7 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
               if key in interested_points:
                 # print(key)
                 cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
-        if use_different_horizontal_vertical_scale==True:
+        if use_different_horizontal_vertical_scale is True:
                 center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
                 axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
                 print ("Elliptical Markings Angle",file=sys.stderr, flush=True)
@@ -524,14 +524,14 @@ def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFI
         perspective_masked_image,masked_image,jewellery_position,face_position=get_jewellery_perspective_image(jewellery_image,jewellery_position,face_position,debug)
         horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
         vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
-        if (debug==True):
+        if (debug is True):
             for key in face_position:
                  if isinstance(face_position[key], list):
                   if key in interested_points:
                     # print(key)
                     cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
 
-            if use_different_horizontal_vertical_scale==True:
+            if use_different_horizontal_vertical_scale is True:
                 center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
                 axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
                 print ("Elliptical Markings Angle",file=sys.stderr, flush=True)
