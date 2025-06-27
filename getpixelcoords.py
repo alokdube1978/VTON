@@ -1,7 +1,6 @@
 import cv2
 import cvzone
 import os
-import math
 import numpy as np
 import sys
 import pprint
