@@ -15,7 +15,6 @@ def back(*args):
     pass
 
 def click_event(event, x, y, flags, params):
-   global img
    if event == cv2.EVENT_LBUTTONDOWN:
       print(f'({x},{y})')
       
