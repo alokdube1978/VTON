@@ -2,7 +2,7 @@ from rembg import remove,new_session
 import extractfacemaskfromimg as extract_face
 import mediapipe as mp
 import cv2
-import math as math
+import math
 import numpy as np
 import sys
 import pprint
