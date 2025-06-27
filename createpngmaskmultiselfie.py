@@ -342,8 +342,10 @@ def add_transparent_image(background, foreground, x_offset=None, y_offset=None):
     bg_h, bg_w, bg_channels = background.shape
     fg_h, fg_w, fg_channels = foreground.shape
 
-    assert bg_channels == 3, f'background image should have exactly 3 channels (RGB). found:{bg_channels}'
-    assert fg_channels == 4, f'foreground image should have exactly 4 channels (RGBA). found:{fg_channels}'
+    if bg_channels != 3:
+        raise AssertionError(f'background image should have exactly 3 channels (RGB). found:{bg_channels}')
+    if fg_channels != 4:
+        raise AssertionError(f'foreground image should have exactly 4 channels (RGBA). found:{fg_channels}')
 
     # center by default
     if x_offset is None: x_offset = (bg_w - fg_w) // 2
@@ -405,10 +407,12 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
         horizontal_reduced_circle_radius=face_position["horizontal_reduced_circle_radius"]
         vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
         for key in face_position:
-             if isinstance(face_position[key], list):
-              if key in interested_points:
-                # print(key)
-                cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
+             if (
+                isinstance(face_position[key], list)
+                and key in interested_points
+            ):
+               # print(key)
+               cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
         if use_different_horizontal_vertical_scale is True:
                 center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
                 axes=(int(face_position["horizontal_reduced_circle_radius"]),int(face_position["vertical_reduced_circle_radius"]))
@@ -442,10 +446,12 @@ def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFI
         vertical_reduced_circle_radius=face_position["vertical_reduced_circle_radius"]
         if (debug is True):
             for key in face_position:
-                 if isinstance(face_position[key], list):
-                  if key in interested_points:
-                    # print(key)
-                    cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
+                 if (
+                    isinstance(face_position[key], list)
+                    and key in interested_points
+                ):
+                   # print(key)
+                   cv2.circle(human_image, (face_position[key][0],face_position[key][1]), radius=3, color=(0, 0, 0), thickness=-1)
 
             if use_different_horizontal_vertical_scale is True:
                 center=(int(face_position["thorax_midpoint"][0]),int(face_position["thorax_midpoint"][1]))
