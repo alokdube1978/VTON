@@ -1,10 +1,4 @@
 import cv2
-import cvzone
-import os
-import math as math
-import numpy as np
-import sys
-import pprint
 
 
 input_path = 'D:\\VTON\\overlay\\necklace9.png'
