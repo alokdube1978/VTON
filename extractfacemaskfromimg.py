@@ -1,7 +1,5 @@
 import cv2
 from cvzone.SelfiSegmentationModule import SelfiSegmentation
-from PIL import Image
-import os
 import numpy as np
 import sys
 import pprint
@@ -9,10 +7,7 @@ import math
 import threading
 from cvzone.PoseModule import PoseDetector
 import mediapipe as mp
-from mediapipe.python._framework_bindings import image
-from mediapipe.python._framework_bindings import image_frame
 from mediapipe.tasks.python import vision
-from mediapipe import tasks
 
 interested_points=["left_shoulder","right_shoulder","nose","left_eye","right_eye","left_ear","right_ear"]
 global_degrees_shoulder_slope_max=4

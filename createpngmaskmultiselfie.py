@@ -1,22 +1,13 @@
 from rembg import remove,new_session
 import extractfacemaskfromimg as extract_face
-from cvzone.FaceDetectionModule import FaceDetector
 import mediapipe as mp
 import cv2
-import cvzone
-import time
-import os
 import math as math
 import numpy as np
 import sys
 import pprint
-import PIL
-from PIL import Image
 from mediapipe.python._framework_bindings import image
-from mediapipe.python._framework_bindings import image_frame
 from mediapipe.tasks.python import vision
-from mediapipe import tasks
-from cvzone.ClassificationModule import Classifier
 USE_CV_POSE_DETECTOR=False
 pp = pprint.PrettyPrinter(indent=4)
 np.set_printoptions(threshold=sys.maxsize)

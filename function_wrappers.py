@@ -1,15 +1,12 @@
 import createpngmaskmultiselfie as overlay
-from flask import Flask, request, make_response, render_template,redirect,jsonify
+from flask import Flask, request, make_response, render_template,jsonify
 from flask_cors import CORS, cross_origin
-import json
 import base64
-from codecs import encode
 import numpy as np
 import cv2
 from waitress import serve
 import time
 import sys
-import urllib
 app = Flask(__name__)
 CORS(app)
 
