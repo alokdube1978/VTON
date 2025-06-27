@@ -199,7 +199,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     max_img_y=shape[0]
     
     with lock:
-        if (RUN_CV_SELFIE_SEGMENTER==True):
+        if (RUN_CV_SELFIE_SEGMENTER is True):
 
                 rembg_image = Selfie_segmentor.removeBG(img, imgBg=BG_COLOR, cutThreshold=0.48)
                 imgOut=rembg_image
@@ -234,7 +234,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     lmList, bboxInfo = detector.findPosition(pose,draw=False, bboxWithHands=False)
     # pp.pprint("Results from lmList:")
     # pp.pprint(lmList)
-    if (use_cv_pose_detector==True): 
+    if (use_cv_pose_detector is True): 
         print("Using CVZONE pose detector",file=sys.stderr, flush=True)
         positions.update({
         "left_eye" : lmList[3][:2],
@@ -286,7 +286,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         # print(mp_pose_landmark_list,file=sys.stderr, flush=True)
         
         
-        if (use_cv_pose_detector==False): 
+        if (use_cv_pose_detector is False): 
             print("Using Mediapipe pose detector",file=sys.stderr, flush=True)
             positions.update({
             "left_eye" : mp_pose_image_landmark_list["left eye"],
@@ -311,11 +311,11 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         print("Positions",file=sys.stderr, flush=True)
         print(positions,file=sys.stderr, flush=True)
         # if we need to ensure shoulders are aligned in z plane - we return error if they are not aligned
-        if (force_shoulder_z_alignment==True and (abs(positions["mp_left_right_shoulder_z_distance"])>normalized_shoulders_z_limit)):
+        if (force_shoulder_z_alignment is True and (abs(positions["mp_left_right_shoulder_z_distance"])>normalized_shoulders_z_limit)):
             print("Error!! Z values of left and right shoulder points not aligned:",file=sys.stderr, flush=True)
             print(positions["mp_left_right_shoulder_z_distance"],file=sys.stderr, flush=True)
             raise Exception('force_shoulder_z_alignment')
-        if (force_shoulder_z_alignment==True and (abs(positions["mp_left_right_ear_z_distance"])>normalized_ears_z_limit)):
+        if (force_shoulder_z_alignment is True and (abs(positions["mp_left_right_ear_z_distance"])>normalized_ears_z_limit)):
             print("Error!! Z values of left and right Ear points not aligned:",abs(positions["mp_left_right_ear_z_distance"],file=sys.stderr, flush=True))
             raise Exception('force_face_z_alignment')
         
@@ -500,7 +500,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         # print ("Too narrow on shoulder points,setting to nose_thorax",file=sys.stderr, flush=True)
         # xy_coordinate_positions["shoulder_points_distance"]=round(2*face_nose_thorax_distance)
     
-    if use_different_horizontal_vertical_scale==True:
+    if use_different_horizontal_vertical_scale is True:
         
         xy_coordinate_positions["horizontal_reduced_circle_radius"]=round(xy_coordinate_positions["shoulder_points_distance"]/2* horizontal_ratio/100)
         xy_coordinate_positions["vertical_reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * vertical_ratio/100)
@@ -1146,7 +1146,7 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         raise Exception('shoulder or nose slope needs correction',math.degrees(abs(math.atan(xy_coordinate_positions["shoulder_slope"]))),math.degrees(abs(math.atan(xy_coordinate_positions["nose_slope"]))))
     
     #resize horizontal scale is shoulder is bent too much
-    if (use_different_horizontal_vertical_scale==True and 
+    if (use_different_horizontal_vertical_scale is True and 
         ((abs(math.degrees((math.atan(xy_coordinate_positions["shoulder_slope"]))))>=1.6*degrees_shoulder_slope_max)
         or
         (abs(math.degrees((math.atan(orig_ear_slope))))>=1.4*degrees_shoulder_slope_max))
