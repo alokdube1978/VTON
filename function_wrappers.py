@@ -101,11 +101,7 @@ def overlayimage():
     
     if (request.method=="POST"):
         content = request.json
-        # print("JSON input",file=sys.stderr, flush=True)
-        # print(jsonify(content),file=sys.stderr, flush=True)
         try:
-            # print("JSON input",file=sys.stderr, flush=True)
-            # print(content,file=sys.stderr, flush=True)
             print("Points",file=sys.stderr, flush=True)
             print(content['points'],file=sys.stderr, flush=True)
             jewellery_image= data_uri_to_cv2_img(content["jewellery_image"])
@@ -139,7 +135,6 @@ def overlayimage():
             
         
             
-        # imgOut=overlay.get_sample_preview_image(jewellery_image,jewellery_position,RUN_CV_SELFIE_SEGMENTER=True)
         print(time.time(),file=sys.stderr, flush=True)
         print ("Jewellery Image dimensions:",file=sys.stderr, flush=True)
         print(jewellery_image.shape,file=sys.stderr, flush=True)
@@ -217,30 +212,12 @@ def overlayimage():
 @cross_origin()
 def preview():
     
-    # print("Headers",file=sys.stderr, flush=True)
-    # print(request.headers,file=sys.stderr, flush=True)
-    # print("Cookies",file=sys.stderr, flush=True)
-    # print(request.cookies,file=sys.stderr, flush=True)
-    # print("Data",file=sys.stderr, flush=True)
-    # print(request.data,file=sys.stderr, flush=True)
-    # print("Args",file=sys.stderr, flush=True)
-    # print(request.args,file=sys.stderr, flush=True)
-    # print("Form",file=sys.stderr, flush=True)
-    # print(request.form,file=sys.stderr, flush=True)
-    # print("Endpoint",file=sys.stderr, flush=True)
-    # print(request.endpoint,file=sys.stderr, flush=True)
-    # print("Method",file=sys.stderr, flush=True)
-    # print(request.method,file=sys.stderr, flush=True)
-    # print("RemoteAddr",file=sys.stderr, flush=True)
-    # print(request.remote_addr,file=sys.stderr, flush=True)
     status="success"
     if (request.method=="OPTIONS"):
         return
     
     if (request.method=="POST"):
         content = request.json
-        # print("JSON input",file=sys.stderr, flush=True)
-        # print(jsonify(request.json),file=sys.stderr, flush=True)
         try:
             
             print("Points",file=sys.stderr, flush=True)
@@ -342,7 +319,6 @@ def preview():
 
 
 if __name__ == '__main__':
-    # app.run(host='0.0.0.0',port=80,debug=True)
     serve(app, host="0.0.0.0", port=8080,threads=10)
 
 

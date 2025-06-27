@@ -5,9 +5,7 @@ import math as math
 import numpy as np
 import sys
 import pprint
-# import PIL
 
-# input_path = 'D:\\VTON\\overlay\\necklace-masked-img.png'
 
 input_path = 'D:\\VTON\\overlay\\necklace9.png'
 
@@ -26,14 +24,12 @@ def click_event(event, x, y, flags, params):
 
 
 cv2.namedWindow("Image")
-# cv2.createButton("Back",back,None,cv2.QT_PUSH_BUTTON,1)
 cv2.setMouseCallback("Image", click_event)
 img = cv2.imread(input_path,cv2.IMREAD_UNCHANGED)
 while True:
    cv2.imshow("Image", img)
    if cv2.waitKey(10) & 0xFF == ord('q'):
       break
-# cv2.imwrite(input_path,img)
 cv2.destroyAllWindows()
 
 # thorax bottom(365,476)

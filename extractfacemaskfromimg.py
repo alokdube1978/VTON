@@ -97,25 +97,16 @@ BG_COLOR = (255, 255, 255) # white
 
 
 def slope_intercept(p1,p2):
-# print(p1,p2)
     slope=np.float64(p2[1]-p1[1])/(p2[0]-p1[0])
-    # print(math.degrees(math.atan(slope)))
     intercept=p1[1]-slope*p1[0]
     if slope==-0.0:
         slope=0.0
     return slope,intercept
 
-# print(img.shape)
-# def click_event(event, x, y, flags, params):
-   # global imgOut
-   # if event == cv2.EVENT_LBUTTONDOWN:
-      # print(f'({x},{y})')
       
       # # put coordinates as text on the image
-      # cv2.putText(imgOut, f'({x},{y})',(x,y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
       
       # # draw point on the image
-      # cv2.circle(imgOut, (x,y), 3, (0,255,255), -1)
  
 def get_xy_coordinate_positions(positions):
     real_positions = {}
@@ -204,18 +195,6 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         # # cv2.imshow("Selfie Masked",imgOut)
         # #we run it once more through mediapipe selife segmentor
         
-        # if (RUN_CV_SELFIE_SEGMENTER==False):
-            # print("second Segmenter")
-            # human_image_tf = mp.Image(image_format=mp.ImageFormat.SRGB, data=img)
-            # with vision.ImageSegmenter.create_from_options(options) as segmenter:
-                # segmentation_result = segmenter.segment(human_image_tf)
-            # image_data=human_image_tf.numpy_view().copy()
-            # category_mask = segmentation_result.category_mask
-            # bg_image = np.zeros(image_data.shape, dtype=np.uint8)
-            # bg_image[:] = BG_COLOR
-            # category_mask_condition=np.stack((category_mask.numpy_view(),) * 3, axis=-1) > 0.9
-            # imgOut = np.where(category_mask_condition,  bg_image,image_data)
-        # cv2.imshow("BG Masked",imgOut)
     with lock:
         pose=detector.findPose(rembg_image,draw=False)
     
@@ -227,8 +206,6 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         
     
     lmList, bboxInfo = detector.findPosition(pose,draw=False, bboxWithHands=False)
-    # pp.pprint("Results from lmList:")
-    # pp.pprint(lmList)
     if (use_cv_pose_detector is True): 
         print("Using CVZONE pose detector",file=sys.stderr, flush=True)
         positions.update({
@@ -269,7 +246,6 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
                 x=round(pose_landmarker_result.pose_landmarks[0][index].x*image_width)
                 y=round(pose_landmarker_result.pose_landmarks[0][index].y*image_height)
                 z=pose_landmarker_result.pose_landmarks[0][index].z
-                # print(elem,":",pose_landmarker_result.pose_landmarks[0][index])
                 mp_pose_landmark_list[elem]=[]
                 mp_pose_landmark_list[elem]=[x,y,z]
                 mp_pose_image_landmark_list[elem]=[x,y]
@@ -277,8 +253,6 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
             "mp_left_right_shoulder_z_distance":mp_pose_landmark_list["left shoulder"][2]-mp_pose_landmark_list["right shoulder"][2],
             "mp_left_right_ear_z_distance":mp_pose_landmark_list["left ear"][2]-mp_pose_landmark_list["right ear"][2],
             })
-        # print("MP_Positions",file=sys.stderr, flush=True)
-        # print(mp_pose_landmark_list,file=sys.stderr, flush=True)
         
         
         if (use_cv_pose_detector is False): 
@@ -320,8 +294,6 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     xy_coordinate_positions["thorax_bottom"]=[0,0]
     xy_coordinate_positions["right_shoulder_pivot"]=[0,0]
     xy_coordinate_positions["left_shoulder_pivot"]=[0,0]
-    # print("xy_coordinate_positions")
-    # print(xy_coordinate_positions,file=sys.stderr, flush=True)
     eye_midpoint=get_midpoint(xy_coordinate_positions["left_eye"],xy_coordinate_positions["right_eye"])
     thorax_midpoint=get_midpoint(xy_coordinate_positions["left_shoulder"],xy_coordinate_positions["right_shoulder"])
     xy_coordinate_positions["eye_midpoint"]=eye_midpoint
@@ -380,49 +352,42 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         print ("Old Value:"+str(xy_coordinate_positions["face_nose_thorax_distance"]),file=sys.stderr, flush=True)
         if (xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]>=1.75*nose_thorax_to_nose_eyes_ratio_max):
             print("NoseThorax to EyeNose ratio over 1.75 limit",file=sys.stderr, flush=True)
-            # face_nose_thorax_distance=0.9*1.5*nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"]
             xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(0.9*1.75*nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
             thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
             face_nose_thorax_distance=1.75*nose_thorax_to_nose_eyes_ratio_avg*xy_coordinate_positions["eye_nose_distance"]
             
         elif (xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]>=1.55*nose_thorax_to_nose_eyes_ratio_max):
             print("NoseThorax to EyeNose ratio over 1.55 limit",file=sys.stderr, flush=True)
-            # face_nose_thorax_distance=0.9*1.5*nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"]
             xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(0.9*1.55*nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
             thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
             face_nose_thorax_distance=1.5*nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"]
             
         elif (xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]>=1.5*nose_thorax_to_nose_eyes_ratio_max):
             print("NoseThorax to EyeNose ratio over 1.5 limit",file=sys.stderr, flush=True)
-            # face_nose_thorax_distance=0.9*1.5*nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"]
             xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(0.9*1.5*nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
             thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
             face_nose_thorax_distance=1.3*nose_thorax_to_nose_eyes_ratio_avg*xy_coordinate_positions["eye_nose_distance"]
             
         elif (xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]>=1.3*nose_thorax_to_nose_eyes_ratio_max):
             print("NoseThorax to EyeNose ratio less than 1.5 and over 1.3 limit",file=sys.stderr, flush=True)
-            # face_nose_thorax_distance=0.95*1.25*nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"]
             xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(1.3*nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
             thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
             face_nose_thorax_distance=1.25*nose_thorax_to_nose_eyes_ratio_avg*xy_coordinate_positions["eye_nose_distance"]
         
         elif (xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]>=1.15*nose_thorax_to_nose_eyes_ratio_max):
             print("NoseThorax to EyeNose ratio less than 1.3 and over 1.15 limit",file=sys.stderr, flush=True)
-            # face_nose_thorax_distance=0.95*1.25*nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"]
             xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(1.15*nose_thorax_to_nose_eyes_ratio_avg,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
             thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
             face_nose_thorax_distance=1.23*nose_thorax_to_nose_eyes_ratio_avg*xy_coordinate_positions["eye_nose_distance"]
         
         elif (xy_coordinate_positions["thorax_nose_to_eye_nose_ratio"]>=1.09*nose_thorax_to_nose_eyes_ratio_max):
             print("NoseThorax to EyeNose ratio less than 1.15 and over 1.09 limit",file=sys.stderr, flush=True)
-            # face_nose_thorax_distance=0.95*1.25*nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"]
             xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(1.09*nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
             thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
             face_nose_thorax_distance=1.09*nose_thorax_to_nose_eyes_ratio_avg*xy_coordinate_positions["eye_nose_distance"]
         
         else:
             print("NoseThorax to EyeNose ratio less than 1.05 limit",file=sys.stderr, flush=True)
-            # face_nose_thorax_distance=nose_thorax_to_nose_eyes_ratio_max*xy_coordinate_positions["eye_nose_distance"] 
             xy_coordinate_positions["thorax_midpoint"]=reset_thorax_midpoint(nose_thorax_to_nose_eyes_ratio_max,xy_coordinate_positions["eye_nose_distance"],xy_coordinate_positions["thorax_midpoint"],nose_slope,xy_coordinate_positions["nose"])
             thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
             face_nose_thorax_distance=nose_thorax_to_nose_eyes_ratio_avg*xy_coordinate_positions["eye_nose_distance"] 
@@ -431,7 +396,6 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         ):
         print("NoseThorax to EyeNose ratio under limit, reseting nose thorax distance:",file=sys.stderr, flush=True)
         print ("Old Face Nose thorax Distance Value:"+str(xy_coordinate_positions["face_nose_thorax_distance"]),file=sys.stderr, flush=True)
-        # thorax_nose_to_eye_nose_ratio=xy_coordinate_positions["face_nose_thorax_distance"]/xy_coordinate_positions["eye_nose_distance"]
         print ("Old Thorax nose to Eye nose ratio:"+str(thorax_nose_to_eye_nose_ratio),file=sys.stderr,flush=True)
         print ("Original Nose Thorax to Eye Nose Ratio"+str(xy_coordinate_positions["orig_thorax_nose_to_eye_nose_ratio"]),file=sys.stderr,flush=True)
         multiplier=xy_coordinate_positions["orig_thorax_nose_to_eye_nose_ratio"]/thorax_nose_to_eye_nose_ratio
@@ -451,7 +415,6 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
             multiplier=orig_multiplier
             
         thorax_midpoint=xy_coordinate_positions["thorax_midpoint"]
-        # face_nose_thorax_distance=math.dist(xy_coordinate_positions["nose"],xy_coordinate_positions["thorax_midpoint"])
         face_nose_thorax_distance=nose_thorax_to_nose_eyes_ratio_min*multiplier*xy_coordinate_positions["eye_nose_distance"] 
         xy_coordinate_positions["face_nose_thorax_distance"]=face_nose_thorax_distance
         print ("New face nose thorax distance Value:"+str(xy_coordinate_positions["face_nose_thorax_distance"]),file=sys.stderr, flush=True)
@@ -490,10 +453,6 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     print("XY Positions",file=sys.stderr, flush=True)
     print(xy_coordinate_positions,file=sys.stderr, flush=True)
     
-    # if (round((xy_coordinate_positions["shoulder_points_distance"]/2)<round(0.95*xy_coordinate_positions["face_nose_thorax_distance"]))
-        # and ((abs(math.degrees(math.atan(nose_slope)))>=degrees_nose_slope_min and abs(math.degrees(math.atan(nose_slope))) <=degrees_nose_slope_max ))):
-        # print ("Too narrow on shoulder points,setting to nose_thorax",file=sys.stderr, flush=True)
-        # xy_coordinate_positions["shoulder_points_distance"]=round(2*face_nose_thorax_distance)
     
     if use_different_horizontal_vertical_scale is True:
         
@@ -1116,8 +1075,6 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
            xy_coordinate_positions["nose_slope"]=orig_nose_slope      
     shoulder_slope=xy_coordinate_positions["shoulder_slope"]
     nose_slope=xy_coordinate_positions["nose_slope"]
-    # print("----shoulder slope,intercept----",file=sys.stderr, flush=True)
-    # print (shoulder_slope,shoulder_intercept,file=sys.stderr, flush=True)
     
    
     # print(math.sin(math.atan(shoulder_slope)))
@@ -1220,7 +1177,6 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
         print("New Horizontal Ratio:"+str(xy_coordinate_positions["horizontal_ratio"]),file=sys.stderr, flush=True)
         vertical_reduced_circle_radius=xy_coordinate_positions["vertical_reduced_circle_radius"]
         horizontal_reduced_circle_radius=xy_coordinate_positions["horizontal_reduced_circle_radius"]
-        # xy_coordinate_positions["reduced_circle_radius"]=round(xy_coordinate_positions["face_nose_thorax_distance"] * vertical_ratio/100)
         reduced_circle_radius=xy_coordinate_positions["reduced_circle_radius"]
         xy_coordinate_positions["thorax_top_bottom_distance"]=xy_coordinate_positions["horizontal_reduced_circle_radius"]*2
         
@@ -1251,8 +1207,6 @@ def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_dif
     xy_coordinate_positions["thorax_bottom"][1]=round(xy_coordinate_positions["thorax_midpoint"][1]+vertical_reduced_circle_radius*math.sin(-1*math.pi/2+math.atan(shoulder_slope)))
     
     
-    # print("reduced circle")
-    # print(xy_coordinate_positions["reduced_circle_radius"])
     positions=img_position_from_xy_coordinate_positions(xy_coordinate_positions)
     print ("XY coordinate positions",file=sys.stderr, flush=True)
     print (xy_coordinate_positions,file=sys.stderr, flush=True)
@@ -1282,7 +1236,6 @@ def main():
     imgOut,positions=getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True)
     imgOut=draw_points_on_image(imgOut,positions)
     cv2.namedWindow("Masked Image")
-    # cv2.setMouseCallback("Masked Image", click_event)
     cv2.imshow("Masked Image", imgOut)
     cv2.waitKey(0) 
     cv2.destroyAllWindows()
