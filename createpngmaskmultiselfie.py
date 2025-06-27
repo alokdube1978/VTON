@@ -136,7 +136,6 @@ def create_mask_from_png_hsv(img):
    
 
 def create_mask_img(img):
-    global session
     '''
         Arguments:
 
@@ -474,8 +473,6 @@ def overlay_jewellery_on_face(jewellery_position,face_position,human_image,persp
     
     
 def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False,use_cv_pose_detector=True):
-    # human_image=cv2.imread(human_path,cv2.IMREAD_UNCHANGED)
-    global interested_points
     try:
         human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment,use_cv_pose_detector)
         human_image_copy=human_image.copy()
@@ -512,7 +509,6 @@ def get_sample_preview_image(jewellery_image,jewellery_position,human_image,RUN_
     
 
 def get_final_image(jewellery_image,jewellery_position, human_image,RUN_CV_SELFIE_SEGMENTER=True,debug=False,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False,use_cv_pose_detector=True):
-    global interested_points
     try:
         human_image,face_position,segmentation_result=get_selfie_human_image(human_image,RUN_CV_SELFIE_SEGMENTER,use_different_horizontal_vertical_scale,force_shoulder_z_alignment,use_cv_pose_detector)
         human_image_copy=human_image.copy()

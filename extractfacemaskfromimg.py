@@ -164,13 +164,8 @@ def reset_thorax_midpoint(multiplier,eye_nose_distance,thorax_midpoint,nose_slop
     
 
 def getSelfieImageandFaceLandMarkPoints(img,RUN_CV_SELFIE_SEGMENTER=True,use_different_horizontal_vertical_scale=False,force_shoulder_z_alignment=False,use_cv_pose_detector=True,debug=True):
-    global lock,global_shoulder_to_nose_eyes_ratio_max,global_nose_thorax_to_nose_eyes_ratio_avg,global_nose_thorax_to_nose_eyes_ratio_max,global_nose_thorax_to_nose_eyes_ratio_min
-    global pose,detector,options,base_options,POSEDETECTOR_BODY_PARTS,global_horizontal_ratio, global_vertical_ratio
-    global global_degrees_nose_slope_max, global_degrees_shoulder_slope_max,global_degrees_nose_slope_min,global_normalized_shoulders_z_limit,global_normalized_ears_z_limit
     xy_coordinate_positions={}
     positions={}
-    global interested_points
-    global global_max_vertical_horizontal_ratio, global_max_horizontal_vertical_ratio,global_vertical_offet, global_horizontal_offset
     degrees_shoulder_slope_max=global_degrees_shoulder_slope_max
     degrees_nose_slope_max=global_degrees_nose_slope_max
     degrees_nose_slope_min=global_degrees_nose_slope_min
