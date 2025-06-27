@@ -411,8 +411,10 @@ def add_transparent_image(background, foreground, x_offset=None, y_offset=None):
     bg_h, bg_w, bg_channels = background.shape
     fg_h, fg_w, fg_channels = foreground.shape
 
-    assert bg_channels == 3, f'background image should have exactly 3 channels (RGB). found:{bg_channels}'
-    assert fg_channels == 4, f'foreground image should have exactly 4 channels (RGBA). found:{fg_channels}'
+    if bg_channels != 3:
+        raise AssertionError(f'background image should have exactly 3 channels (RGB). found:{bg_channels}')
+    if fg_channels != 4:
+        raise AssertionError(f'foreground image should have exactly 4 channels (RGBA). found:{fg_channels}')
 
     # center by default
     if x_offset is None: x_offset = (bg_w - fg_w) // 2
